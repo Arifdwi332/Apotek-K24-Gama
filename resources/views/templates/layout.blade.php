@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>APOTEK K24 GAMA</title>
 
-    <link rel="icon" type="image/x-icon" href="{{ asset('lte/dist/img/LogoApi.png') }}"
-        style="opacity: .8; width: 64px; height: 20px;">
-
-
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="{{ asset('lte/font/SourceSans3-Italic-VariableFont_wght.ttf') }}">
     <!-- Font Awesome Icons -->
