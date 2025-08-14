@@ -201,20 +201,23 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                    <a href="{{ route('mst.barang.index') }}" class="nav-link">
                                         <i class="fas fa-grip-lines-vertical nav-icon"></i>
-                                        <p>Barang dan ED</p>
+                                        <p>Master Barang</p>
                                     </a>
                                 </li>
                             </ul>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                    <a href="{{ route('barangstok.input_stock') }}" class="nav-link">
                                         <i class="fas fa-grip-lines-vertical nav-icon"></i>
-                                        <p>Input Stock Barang</p>
+                                        <p>Stok Barang dan ED</p>
                                     </a>
                                 </li>
                             </ul>
+
+
+
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
@@ -223,7 +226,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('user.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>User</p>
                             </a>
@@ -627,6 +630,7 @@
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    @stack('scripts')
 </body>
 
 </html>
