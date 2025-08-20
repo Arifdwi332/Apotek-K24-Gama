@@ -155,7 +155,10 @@
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a href="#" class="btn btn-danger">logout</a>
+                    <form action="{{ route('logout') }}" method="GET">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
                 </li>
             </ul>
         </nav>
@@ -223,6 +226,12 @@
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice"></i>
                                 <p>Report</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('logstok.input_stock') }}" class="nav-link">
+                                <i class="nav-icon fas fa-file-invoice"></i>
+                                <p>Log Pencatatan</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -630,6 +639,16 @@
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/jszip/jszip.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/pdfmake/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/pdfmake/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+
     @stack('scripts')
 </body>
 
