@@ -10,12 +10,12 @@
             <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
 
                 <button class="btn btn-primary btn-sm ms-2" id="btnTambah">
-                    <i class="fas fa-plus"></i> Tambah Stok
+                    Tambah Stok
                 </button>
             </div>
         </div>
 
-        <div class="card-body">
+        <div class="card-body table-responsive">
             <table class="table table-bordered table-striped" id="tableBarang" style="width:100%">
                 <thead>
                     <tr>

@@ -10,13 +10,13 @@
             <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
 
                 <button class="btn btn-primary btn-sm ms-2" id="btnTambah">
-                    Tambah Stok
+                    <i class="fas fa-plus"></i> Tambah Stok
                 </button>
             </div>
         </div>
 
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-striped" id="tableLog" style="width:100%">
+        <div class="card-body">
+            <table class="table table-bordered table-striped" id="tableBarang" style="width:100%">
                 <thead>
                     <tr>
                         <th>No</th>
@@ -24,10 +24,10 @@
                         <th>Jumlah Stock</th>
                         <th>Tanggal Expired</th>
                         <th>Tanggal Pencatatan</th>
-                        <th>Tanggal Diperbarui</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Diperbarui Oleh</th>
-
+                        <th>Status</th>
+                        @if (auth()->user()->pegawai->role_id == 1)
+                            <th>Aksi</th>
+                        @endif
                     </tr>
                 </thead>
             </table>
@@ -43,16 +43,16 @@
             let barangId = @json($barang->id ?? null);
             let barangNm = @json($barang->barang_nm ?? '');
 
-            table = $('#tableLog').DataTable({
+            let table = $('#tableBarang').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('logstok.data') }}",
+                    url: "{{ route('barangstok.data') }}",
                     data: function(d) {
                         d.barang_id = barangId;
                     }
                 },
-                dom: 'Bfrtip', // <--- ini
+                dom: 'Bfrtip',
                 buttons: [{
                         extend: 'excel',
                         text: 'Export',
@@ -61,44 +61,50 @@
                     },
 
                 ],
+
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'barang_nm',
-                        name: 'barang_nm'
+                        data: 'barang_nm'
                     },
                     {
-                        data: 'stok',
-                        name: 'stok'
+                        data: 'stok'
+                    },
+                    {
+                        data: 'exp_tgl'
+                    },
+                    {
+                        data: 'catat_tgl'
                     },
                     {
                         data: 'exp_tgl',
-                        name: 'exp_tgl'
-                    },
-                    {
-                        data: 'catat_tgl',
-                        name: 'catat_tgl'
-                    },
-                    {
-                        data: 'updated_at',
-                        name: 'updated_at'
-                    },
-                    {
-                        data: 'created_by',
-                        name: 'created_by'
-                    },
-                    {
-                        data: 'updated_by',
-                        name: 'updated_by'
-                    },
+                        name: 'status',
+                        render: function(data) {
+                            if (!data)
+                                return '<span class="badge bg-secondary">Tidak ada tanggal</span>';
+                            let today = new Date();
+                            let exp = new Date(data);
+                            let diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
 
+                            if (diffDays > 60) return '<span class="badge bg-success">Baik</span>';
+                            else if (diffDays > 0)
+                                return '<span class="badge bg-danger">Hampir Expired</span>';
+                            else return '<span class="badge bg-warning">Expired</span>';
+                        }
+                    },
+                    @if (auth()->user()->pegawai->role_id == 1)
+                        {
+                            data: 'aksi',
+                            name: 'aksi',
+                            orderable: false,
+                            searchable: false
+                        },
+                    @endif
                 ]
             });
-
             table.buttons().container().prependTo('#headerButtons');
             $('#btnTambah').click(function() {
                 $('#formBarang')[0].reset();
