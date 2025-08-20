@@ -2,20 +2,32 @@
 @section('breadcrumbs', 'Stok Barang')
 
 @section('content')
+
     <div class="card shadow">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">
-                Daftar Stok Barang - {{ $barang->barang_nm }}
+                Stok {{ $barang->barang_nm }}
             </h4>
-            <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
+            <div class="d-flex flex-nowrap align-items-center" id="headerButtons" style="gap: 0.5rem; margin-left:auto;">
 
-                <button class="btn btn-primary btn-sm ms-2" id="btnTambah">
+                <!-- Tambah stok desktop -->
+                <button class="btn btn-primary btn-sm d-none d-sm-inline-flex" id="btnTambah" style="white-space: nowrap;">
                     Tambah Stok
                 </button>
+
+                <!-- Tambah stok mobile -->
+                <button class="btn btn-primary btn-sm d-inline-flex d-sm-none" id="btnTambahMobile"
+                    style="width:60px; height:36px; display:inline-flex; align-items:center; justify-content:center; margin-top:-7px;">
+                    <i class="fas fa-plus  fa-sm"></i>
+                </button>
+
             </div>
+
         </div>
 
-        <div class="card-body table-responsive">
+
+
+        <div class="card-body">
             <table class="table table-bordered table-striped" id="tableLog" style="width:100%">
                 <thead>
                     <tr>
@@ -55,12 +67,41 @@
                 dom: 'Bfrtip', // <--- ini
                 buttons: [{
                         extend: 'excel',
-                        text: 'Export',
-                        className: 'btn btn-success btn-sm ms-2 mr-2',
-                        titleAttr: 'Export ke Excel'
+                        text: 'Export', // desktop
+                        className: 'btn btn-success btn-sm d-none d-sm-inline-flex',
+                        titleAttr: 'Export ke Excel',
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '31px', // samain tinggi
+                                'padding': '0.25rem 0.5rem', // samain padding dengan .btn-sm
+                                'font-size': '0.875rem',
+                                'line-height': '1.5',
+                                'border-radius': '0.25rem'
+                            });
+                        }
                     },
-
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-print fa-sm"></i>', // mobile icon
+                        className: 'btn btn-success btn-sm d-inline-flex d-sm-none',
+                        titleAttr: 'Export ke Excel',
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '36px',
+                                'width': '15px',
+                                'padding': '0.25rem',
+                                'border-radius': '0.25rem'
+                            });
+                        }
+                    }
                 ],
+
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -110,6 +151,20 @@
                 }
                 $('#modalBarang .modal-title').text('Tambah Stok Barang' + (barangNm ? (' - ' + barangNm) :
                     ''));
+                $('#modalBarang').modal('show');
+            });
+
+            $('#btnTambah, #btnTambahMobile').click(function() {
+                $('#formBarang')[0].reset();
+                $('#id').val('');
+                if (barangId) {
+                    $('#barang_id').val(String(barangId));
+                } else {
+                    $('#barang_id').val('');
+                }
+                $('#modalBarang .modal-title').text(
+                    'Tambah Stok Barang' + (barangNm ? (' - ' + barangNm) : '')
+                );
                 $('#modalBarang').modal('show');
             });
 

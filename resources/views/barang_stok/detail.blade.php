@@ -5,12 +5,19 @@
     <div class="card shadow">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">
-                Daftar Stok Barang - {{ $barang->barang_nm }}
+                Stok {{ $barang->barang_nm }}
             </h4>
             <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
 
-                <button class="btn btn-primary btn-sm ms-2" id="btnTambah">
+                <button class="btn btn-primary btn-sm d-none d-sm-inline-flex" id="btnTambah"
+                    style="white-space: nowrap;margin-left: 9px">
                     Tambah Stok
+                </button>
+
+                <!-- Tambah stok mobile -->
+                <button class="btn btn-primary btn-sm d-inline-flex d-sm-none" id="btnTambahMobile"
+                    style="width:60px; height:36px; display:inline-flex; align-items:center; justify-content:center; margin-top:-7px; margin-left: 9px">
+                    <i class="fas fa-plus  fa-sm"></i>
                 </button>
             </div>
         </div>
@@ -55,11 +62,39 @@
                 dom: 'Bfrtip',
                 buttons: [{
                         extend: 'excel',
-                        text: 'Export',
-                        className: 'btn btn-success btn-sm ms-2 mr-2',
-                        titleAttr: 'Export ke Excel'
+                        text: 'Export', // desktop
+                        className: 'btn btn-success btn-sm d-none d-sm-inline-flex',
+                        titleAttr: 'Export ke Excel',
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '31px',
+                                'padding': '0.25rem 0.5rem',
+                                'font-size': '0.875rem',
+                                'line-height': '1.5',
+                                'border-radius': '0.25rem'
+                            });
+                        }
                     },
-
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-print fa-sm"></i>', // mobile icon
+                        className: 'btn btn-success btn-sm d-inline-flex d-sm-none',
+                        titleAttr: 'Export ke Excel',
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '36px',
+                                'width': '15px',
+                                'padding': '0.25rem',
+                                'border-radius': '0.25rem'
+                            });
+                        }
+                    }
                 ],
 
                 columns: [{
@@ -106,7 +141,7 @@
                 ]
             });
             table.buttons().container().prependTo('#headerButtons');
-            $('#btnTambah').click(function() {
+            $('#btnTambah, #btnTambahMobile').click(function() {
                 $('#formBarang')[0].reset();
                 $('#id').val('');
                 if (barangId) {
@@ -114,10 +149,14 @@
                 } else {
                     $('#barang_id').val('');
                 }
-                $('#modalBarang .modal-title').text('Tambah Stok Barang' + (barangNm ? (' - ' + barangNm) :
-                    ''));
+                $('#modalBarang .modal-title').text(
+                    'Tambah Stok Barang' + (barangNm ? (' - ' + barangNm) : '')
+                );
                 $('#modalBarang').modal('show');
             });
+
+
+
 
             $('#formBarang').submit(function(e) {
                 e.preventDefault();
