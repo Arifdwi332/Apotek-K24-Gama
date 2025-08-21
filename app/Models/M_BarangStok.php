@@ -21,4 +21,13 @@ class M_BarangStok extends Model
     {
         return $this->belongsTo(M_MstBarang::class, 'barang_id');
     }
+    public function createdBy()
+{
+    return $this->belongsTo(M_MstPegawai::class, 'created_by', 'pegawai_id');
+}
+
+public function updatedBy()
+{
+    return $this->belongsTo(M_MstPegawai::class, 'updated_by', 'pegawai_id');
+}
 }

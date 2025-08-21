@@ -3,23 +3,23 @@
 namespace App\Http\Controllers;
 use App\Models\M_MstBarang;
 use Yajra\DataTables\Facades\DataTables;
-
+use Carbon\Carbon;
 use App\Models\M_BarangStoK;
 
 use Illuminate\Http\Request;
 
-class BarangStokController extends Controller
+class LogPencatatanController extends Controller
 {
-    public function inputStock()
+     public function inputStock()
     {
         $mstBarang = M_MstBarang::all(); // ambil semua data
-    return view('barang_stok.index', compact('mstBarang'));
+    return view('log_pencatatan.index', compact('mstBarang'));
     }
 
     public function getData(Request $request)
     {
 
-        $query = M_BarangStok::with('mstBarang');
+        $query = M_BarangStok::with(['mstBarang','createdBy','updatedBy']);
 
         if ($request->barang_id) {
             $query->where('barang_id', $request->barang_id);
@@ -32,16 +32,22 @@ class BarangStokController extends Controller
             ->addColumn('barang_nm', function($row){
                 return $row->mstBarang->barang_nm ?? '-';
             })
-            ->addColumn('aksi', function($row){
-                if (auth()->user()->pegawai->role_id == 1) {
-                    return '
-                        <button class="btn btn-sm btn-primary btn-edit" data-id="'.$row->id.'">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="'.$row->id.'">Delete</button>
-                    ';
-                }
-                return ''; // kalau bukan role 1, kosong
+             ->addColumn('created_by', function($row){
+                return $row->createdBy->pegawai_nm ?? '-';
             })
-            ->rawColumns(['aksi'])
+            ->addColumn('updated_by', function($row){
+                return $row->updatedBy->pegawai_nm ?? '-';
+            })
+              ->editColumn('updated_at', function($row){
+                return $row->updated_at 
+                    ? Carbon::parse($row->updated_at)->format('d-m-Y H:i') 
+                    : '-';
+            })
+             ->editColumn('catat_tgl', function($row){
+                return $row->catat_tgl 
+                    ? Carbon::parse($row->catat_tgl)->format('d-m-Y') 
+                    : '-';
+            })
             ->make(true);
     }
 
@@ -106,9 +112,7 @@ class BarangStokController extends Controller
     $barang     = M_MstBarang::findOrFail($id); // satu barang untuk detail
     $mstBarang  = M_MstBarang::select('id','barang_nm')->orderBy('barang_nm')->get(); // list utk dropdown
 
-    return view('barang_stok.detail', compact('barang','mstBarang'));
+    return view('log_pencatatan.detail', compact('barang','mstBarang'));
 }
-
-
 
 }
