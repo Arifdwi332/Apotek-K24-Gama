@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login API-TIME</title>
+    <title>Login Apotek Gama</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="{{ asset('lte/font/SourceSans3-Italic-VariableFont_wght.ttf') }}">
@@ -30,13 +30,13 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <div class="image">
+                {{-- <div class="image">
                     <img src="{{ asset('lte/dist/img/Logo_API.png') }}" alt="API-Logo" class="brand-image"
                         style="opacity: .8; width: 200px; height: auto;">
-                </div>
+                </div> --}}
+                <h1 class="text-bold">Log In</h1>
             </div>
             <div class="card-body">
-                <p class="login-box-msg">API TIME</p>
 
                 @if ($errors->any())
                     <div class="alert alert-danger">
@@ -71,8 +71,8 @@
                     </div>
                     <div class="row">
                         <!-- /.col -->
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        <div class="col-4 ml-auto">
+                            <button type="submit" class="btn btn-primary btn-block">Masuk</button>
                         </div>
                         <!-- /.col -->
                     </div>
