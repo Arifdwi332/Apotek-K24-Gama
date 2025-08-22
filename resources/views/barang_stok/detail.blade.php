@@ -65,6 +65,9 @@
                         text: 'Export', // desktop
                         className: 'btn btn-success btn-sm d-none d-sm-inline-flex',
                         titleAttr: 'Export ke Excel',
+                        exportOptions: {
+                            columns: ':visible:not(:last-child)',
+                        },
                         init: function(api, node, config) {
                             $(node).css({
                                 'display': 'inline-flex',
