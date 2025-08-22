@@ -28,7 +28,7 @@
 
 
         <div class="card-body">
-            <table class="table table-bordered table-striped" id="tableLog" style="width:100%">
+            <table class="table table-bordered table-striped table-responsive" id="tableLog" style="width:100%">
                 <thead>
                     <tr>
                         <th>No</th>
