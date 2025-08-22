@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\M_MstBarang;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
-use App\Models\M_BarangStoK;
+use App\Models\M_BarangStok;
 
 use Illuminate\Http\Request;
 
