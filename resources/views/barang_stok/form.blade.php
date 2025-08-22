@@ -27,7 +27,7 @@
                     </div>
                     <div class="form-group">
                         <label for="exp_tgl">Tanggal Expired</label>
-                        <input type="date" name="exp_tgl" id="exp_tgl" class="form-control">
+                        <input type="date" name="exp_tgl" id="exp_tgl" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="catat_tgl">Tanggal Pencatatan</label>
