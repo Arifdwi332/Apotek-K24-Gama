@@ -155,6 +155,37 @@
                 $('#modalBarang').modal('show');
             });
 
+            $('body').on('click', '.btn-edit', function() {
+                var id = $(this).data('id');
+                $.get("/stock-barang/edit/" + id, function(data) {
+                    $('#id').val(data.id);
+                    $('#barang_id').val(data.barang_id);
+                    $('#stok').val(data.stok);
+                    $('#exp_tgl').val(data.exp_tgl);
+                    $('#catat_tgl').val(data.catat_tgl);
+                    $('#modalBarang .modal-title').text('Edit Stok Barang');
+                    $('#modalBarang').modal('show');
+                });
+            });
+
+            // Hapus Stok
+            $('body').on('click', '.btn-delete', function() {
+                var id = $(this).data('id');
+                if (confirm('Yakin ingin menghapus data ini?')) {
+                    $.ajax({
+                        url: "/stock-barang/delete/" + id,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(res) {
+                            table.ajax.reload();
+                            alert(res.message);
+                        }
+                    });
+                }
+            });
+
 
 
 
