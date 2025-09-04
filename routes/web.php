@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangStokController;
 use App\Http\Controllers\MstBarangController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MemberController;
 use App\Exports\BarangStokExport;
 use App\Http\Controllers\LogPencatatanController;
 use Maatwebsite\Excel\Facades\Excel;
@@ -57,6 +58,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/update/{id}', [UserController::class, 'update'])->name('update');
         Route::get('/edit/{id}', [UserController::class,'edit'])->name('edit');
         Route::delete('/delete/{id}', [UserController::class,'destroy'])->name('delete');
+    });
+    Route::prefix('member')->name('member.')->group(function () {
+        Route::get('/', [MemberController::class,'index'])->name('index');
+        Route::get('/data', [MemberController::class,'getData'])->name('data');
+        Route::post('/store', [MemberController::class,'store'])->name('store');
+        Route::post('/update/{id}', [MemberController::class,'update'])->name('update');
+        Route::get('/edit/{id}', [MemberController::class,'edit'])->name('edit');
+        Route::delete('/delete/{id}', [MemberController::class,'destroy'])->name('delete');
     });
 
 });
