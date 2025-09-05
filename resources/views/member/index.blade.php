@@ -6,11 +6,23 @@
 
 @section('content')
     <div class="card shadow">
-        <div class="card-header">
-            <h4 class="card-title d-inline">Daftar Member</h4>
-            <button class="btn btn-primary btn-sm float-right" id="btnTambah">
-                <i class="fas fa-plus"></i> Tambah Member
-            </button>
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">
+                Daftar Member
+            </h4>
+            <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
+
+                <button class="btn btn-primary btn-sm d-none d-sm-inline-flex" id="btnTambah"
+                    style="white-space: nowrap;margin-left: 9px">
+                    Tambah Stok
+                </button>
+
+                <button class="btn btn-primary btn-sm d-inline-flex d-sm-none" id="btnTambahMobile"
+                    style="width:60px; height:36px; display:inline-flex; align-items:center; justify-content:center; margin-top:-7px; margin-left: 9px">
+                    <i class="fas fa-plus  fa-sm"></i>
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped" id="tableMember" style="width:100%">
@@ -163,8 +175,50 @@
                 serverSide: true,
                 ajax: "{{ route('member.data') }}",
                 columns: columns,
-                order: order
+                order: order,
+
+                dom: 'Bfrtip',
+                buttons: [{
+                        extend: 'excel',
+                        text: 'Export', // desktop
+                        className: 'btn btn-success btn-sm d-none d-sm-inline-flex',
+                        titleAttr: 'Export ke Excel',
+                        exportOptions: {
+                            columns: ':visible:not(:last-child)',
+                        },
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '31px',
+                                'padding': '0.25rem 0.5rem',
+                                'font-size': '0.875rem',
+                                'line-height': '1.5',
+                                'border-radius': '0.25rem'
+                            });
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-print fa-sm"></i>', // mobile icon
+                        className: 'btn btn-success btn-sm d-inline-flex d-sm-none',
+                        titleAttr: 'Export ke Excel',
+                        init: function(api, node, config) {
+                            $(node).css({
+                                'display': 'inline-flex',
+                                'align-items': 'center',
+                                'justify-content': 'center',
+                                'height': '36px',
+                                'width': '15px',
+                                'padding': '0.25rem',
+                                'border-radius': '0.25rem'
+                            });
+                        }
+                    }
+                ],
             });
+            table.buttons().container().prependTo('#headerButtons');
 
             $('#btnTambah').click(function() {
                 $('#formMember')[0].reset();
