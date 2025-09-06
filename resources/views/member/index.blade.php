@@ -8,9 +8,9 @@
     <div class="card shadow">
 
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="card-title mb-0">
+            <h5 class=" mb-0">
                 Daftar Member
-            </h4>
+            </h5>
             <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
 
                 <button class="btn btn-primary btn-sm d-none d-sm-inline-flex" id="btnTambah"

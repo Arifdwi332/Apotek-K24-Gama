@@ -4,7 +4,7 @@
 @section('content')
     <div class="card shadow">
         <div class="card-header">
-            <h4 class="card-title mb-0">Laporan Stok Barang</h4>
+            <h5 class="mb-0">Laporan Stok Barang</h5>
         </div>
 
         <div class="card-body">
@@ -152,7 +152,16 @@
                     },
                     {
                         data: 'exp_tgl',
-                        name: 'exp_tgl'
+                        name: 'exp_tgl',
+                        render: function(data) {
+                            if (!data) return '-';
+                            let date = new Date(data);
+                            return date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
                     },
                     {
                         data: 'exp_tgl',

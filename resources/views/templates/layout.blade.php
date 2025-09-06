@@ -196,35 +196,17 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('dashboard') }}" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('barangstok.input_stock') }}" class="nav-link">
                                 <i class="nav-icon fas fa-dolly"></i>
-                                <p>Stock <i class="right fas fa-angle-left"></i></p>
+                                <p>Stok Barang dan ED</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('mst.barang.index') }}" class="nav-link">
-                                        <i class="fas fa-grip-lines-vertical nav-icon"></i>
-                                        <p>Master Barang</p>
-                                    </a>
-                                </li>
-                            </ul>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('barangstok.input_stock') }}" class="nav-link">
-                                        <i class="fas fa-grip-lines-vertical nav-icon"></i>
-                                        <p>Stok Barang dan ED</p>
-                                    </a>
-                                </li>
-                            </ul>
-
-
-
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('barangstok.reportPage') }}" class="nav-link">

@@ -4,7 +4,7 @@
 @section('content')
     <div class="card shadow" id="cardTable">
         <div class="card-header">
-            <h4 class="card-title d-inline">Daftar Stok Barang <span id="titleBarang"></span></h4>
+            <h4 class=" d-inline">Daftar Stok Barang <span id="titleBarang"></span></h4>
             <button class="btn btn-primary btn-sm float-right" id="btnTambah">
                 <i class="fas fa-plus"></i> Tambah Stok
             </button>
@@ -339,7 +339,16 @@
                 name: 'stok'
             }, {
                 data: 'exp_tgl',
-                name: 'exp_tgl'
+                name: 'exp_tgl',
+                render: function(data) {
+                    if (!data) return '-';
+                    let date = new Date(data);
+                    return date.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                }
             }, {
                 data: 'catat_tgl',
                 name: 'catat_tgl'

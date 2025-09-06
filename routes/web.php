@@ -8,6 +8,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MemberController;
 use App\Exports\BarangStokExport;
 use App\Http\Controllers\LogPencatatanController;
+use App\Http\Controllers\DashboardController;
+
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request; // tambahkan ini di atas
 
@@ -80,17 +82,27 @@ Route::middleware('auth')->group(function () {
     });
 
         Route::get('/rak/{rak}/shafts', [BarangStokController::class, 'getShafts'])->name('rak.shafts');
-        Route::get('/stock-barang/barang/{id}', [\App\Http\Controllers\BarangStokController::class, 'showBarang'])->name('barangstok.showBarang');
+        Route::get('/stock-barang/barang/{id}', [BarangStokController::class, 'showBarang'])->name('barangstok.showBarang');
         Route::prefix('mst')->name('mst.')->group(function () {
             Route::delete('/barang/{id}/hapus', [BarangStokController::class, 'hapus'])
                 ->name('barang.hapus');   
         });
-        Route::get('/rak/list-rak-barang', [\App\Http\Controllers\BarangStokController::class, 'listRakBarang'])
+        Route::get('/rak/list-rak-barang', [BarangStokController::class, 'listRakBarang'])
          ->name('rak.list');
         // REPORT STOCK
         Route::get('/stock-barang/report', [BarangStokController::class, 'reportPage'])
             ->name('barangstok.reportPage');
         Route::get('/stock-barang/report-data', [BarangStokController::class, 'reportData'])
             ->name('barangstok.reportData');
+
+            // Dashboard page
+        Route::get('/dashboard', [DashboardController::class, 'dashboard'])
+            ->name('dashboard');
+
+        // AJAX DataTables
+        Route::get('/dashboard/expired', [DashboardController::class, 'dashboardExpired'])
+            ->name('dashboard.expired');
+        Route::get('/dashboard/fast-moving', [DashboardController::class, 'dashboardFast'])
+            ->name('dashboard.fast');
 
 });

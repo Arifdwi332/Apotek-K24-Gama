@@ -160,7 +160,15 @@
                     {
                         data: 'exp_tgl',
                         name: 'exp_tgl',
-                        defaultContent: '-'
+                        render: function(data) {
+                            if (!data) return '-';
+                            let date = new Date(data);
+                            return date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
                     },
 
                     {

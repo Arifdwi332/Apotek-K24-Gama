@@ -4,7 +4,7 @@
 @section('content')
     <div class="card shadow">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="card-title mb-0">
+            <h4 class="mb-0">
                 Stok {{ $barang->barang_nm }}
             </h4>
             <div class="d-flex align-items-center" id="headerButtons" style="margin-left:auto;">
@@ -112,7 +112,17 @@
                         data: 'stok'
                     },
                     {
-                        data: 'exp_tgl'
+                        data: 'exp_tgl',
+                        name: 'exp_tgl',
+                        render: function(data) {
+                            if (!data) return '-';
+                            let date = new Date(data);
+                            return date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
                     },
                     {
                         data: 'catat_tgl'
