@@ -15,7 +15,7 @@
 
                 <button class="btn btn-primary btn-sm d-none d-sm-inline-flex" id="btnTambah"
                     style="white-space: nowrap;margin-left: 9px">
-                    Tambah Stok
+                    Tambah Member
                 </button>
 
                 <button class="btn btn-primary btn-sm d-inline-flex d-sm-none" id="btnTambahMobile"
@@ -23,6 +23,24 @@
                     <i class="fas fa-plus  fa-sm"></i>
                 </button>
             </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-2">
+                <label for="qHp" class="mb-1" style="font-size: 0.85rem;">Cari Member</label>
+                <div class="d-flex">
+                    <input type="text" id="qHp" class="form-control form-control-sm" placeholder="nomor hp member"
+                        style="max-width:200px;">
+                    <button class="btn btn-outline-primary btn-sm ml-2" id="btnCariMember">Cari</button>
+                    <button class="btn btn-outline-secondary btn-sm ml-2" id="btnResetMember">Reset</button>
+                </div>
+                @if (!is_admin())
+                    <small class="text-muted">Non-admin harus mencari dulu untuk menampilkan data.</small>
+                @endif
+            </div>
+
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped" id="tableMember" style="width:100%">
@@ -47,6 +65,7 @@
             </table>
         </div>
     </div>
+
 
     <!-- Modal Form -->
     <div class="modal fade" id="modalMember" tabindex="-1" role="dialog" aria-hidden="true">
@@ -173,10 +192,16 @@
             const table = $('#tableMember').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('member.data') }}",
+                searching: false, // disable search default
+                deferLoading: IS_ADMIN ? null : 0, // non-admin: tidak load awal
+                ajax: {
+                    url: "{{ route('member.data') }}",
+                    data: function(d) {
+                        d.q = $('#qHp').val(); // kirim q = nomor HP
+                    }
+                },
                 columns: columns,
                 order: order,
-
                 dom: 'Bfrtip',
                 buttons: [{
                         extend: 'excel',
@@ -220,6 +245,17 @@
             });
             table.buttons().container().prependTo('#headerButtons');
 
+            $('#btnCariMember').on('click', function(e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
+
+            $('#btnResetMember').on('click', function(e) {
+                e.preventDefault();
+                $('#qHp').val(''); // kosongkan input
+                table.ajax.reload(); // reload tabel
+            });
+
             $('#btnTambah').click(function() {
                 $('#formMember')[0].reset();
                 $('#id').val('');
@@ -240,7 +276,7 @@
                         if (res.success) {
                             $('#modalMember').modal('hide');
                             table.ajax.reload(null, false);
-                            alert(res.message);
+                            swalSuccess(res.message);
                         }
                     },
                     error: function(xhr) {
@@ -248,7 +284,7 @@
                         if (xhr.responseJSON && xhr.responseJSON.errors) {
                             msg = Object.values(xhr.responseJSON.errors).flat().join('\n');
                         }
-                        alert(msg);
+                        swalError(msg);
                     }
                 });
             });
@@ -268,8 +304,8 @@
             });
 
             $('body').on('click', '.btn-delete', function() {
-                var id = $(this).data('id');
-                if (confirm('Yakin ingin menghapus member ini?')) {
+                const id = $(this).data('id');
+                swalConfirm('Yakin ingin menghapus member ini?', function() {
                     $.ajax({
                         url: "{{ url('member/delete') }}/" + id,
                         type: 'DELETE',
@@ -278,11 +314,47 @@
                         },
                         success: function(res) {
                             table.ajax.reload(null, false);
-                            alert(res.message);
+                            swalSuccess(res.message);
+                        },
+                        error: function(xhr) {
+                            let msg = (xhr.responseJSON && xhr.responseJSON.message) ?
+                                xhr.responseJSON.message : 'Gagal menghapus.';
+                            swalError(msg);
                         }
                     });
-                }
+                });
             });
         });
+
+        function swalSuccess(msg) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: msg || 'Operasi berhasil.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function swalError(msg) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: msg || 'Terjadi kesalahan.',
+            });
+        }
+
+        function swalConfirm(msg, callback) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Konfirmasi',
+                html: msg || 'Yakin ingin melanjutkan?',
+                showCancelButton: true,
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal'
+            }).then((res) => {
+                if (res.isConfirmed) callback();
+            });
+        }
     </script>
 @endpush

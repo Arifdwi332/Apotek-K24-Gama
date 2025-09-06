@@ -20,31 +20,45 @@ class MemberController extends Controller
     /**
      * Ambil data untuk DataTables (server-side)
      */
-    public function getData()
-    {
-       
-        $data = M_Member::query();
+   public function getData()
+{
+    $isAdmin = is_admin();
+    $term = request('q'); // ambil dari param custom "q"
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-          
-            ->editColumn('created_at', fn($row) => only_admin(fn() => $row->created_at?->format('d-m-Y H:i:s')))
-            ->editColumn('updated_at', fn($row) => only_admin(fn() => $row->updated_at?->format('d-m-Y H:i:s')))
-            ->editColumn('created_by', fn($row) => only_admin(fn() => get_user($row->created_by)))
-            ->editColumn('updated_by', fn($row) => only_admin(fn() => get_user($row->updated_by)))
+    $query = M_Member::query();
 
-            ->addColumn('aksi', function($row){
-                return only_admin(function() use ($row) {
-                    return '
-                        <button class="btn btn-sm btn-primary btn-edit" data-id="'.$row->id_member.'">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="'.$row->id_member.'">Delete</button>
-                    ';
-                });
-            })
-
-            ->rawColumns(['aksi'])
-            ->make(true);
+    if (!$isAdmin) {
+        // Non-admin: wajib isi nomor HP
+        if (empty($term)) {
+            return datatables()->of(M_Member::whereRaw('1=0'))
+                ->addIndexColumn()
+                ->make(true);
+        }
+        $query->where('no_hp', 'like', "%{$term}%");
+    } else {
+        // Admin: jika ada input, filter juga, jika kosong ambil semua
+        if (!empty($term)) {
+            $query->where('no_hp', 'like', "%{$term}%");
+        }
     }
+
+    return DataTables::of($query)
+        ->addIndexColumn()
+        ->editColumn('created_at', fn($row) => only_admin(fn() => $row->created_at?->format('d-m-Y H:i:s')))
+        ->editColumn('updated_at', fn($row) => only_admin(fn() => $row->updated_at?->format('d-m-Y H:i:s')))
+        ->editColumn('created_by', fn($row) => only_admin(fn() => get_user($row->created_by)))
+        ->editColumn('updated_by', fn($row) => only_admin(fn() => get_user($row->updated_by)))
+        ->addColumn('aksi', function($row){
+            return only_admin(function() use ($row) {
+                return '
+                    <button class="btn btn-sm btn-primary btn-edit" data-id="'.$row->id_member.'">Edit</button>
+                    <button class="btn btn-sm btn-danger btn-delete" data-id="'.$row->id_member.'">Delete</button>
+                ';
+            });
+        })
+        ->rawColumns(['aksi'])
+        ->make(true);
+}
 
     /**
      * Simpan data member baru
