@@ -2,30 +2,14 @@
 @section('breadcrumbs', 'Input Stock Barang')
 
 @section('content')
-    <div class="row">
-        @foreach ($mstBarang as $barang)
-            <div class="col-6 col-md-3 mb-3">
-                <div class="card card-outline card-primary h-100">
-                    <div class="card-body d-flex align-items-center justify-content-center">
-                        <h5 class="m-0 text-center">
-                            <a href="{{ route('barangstok.show', $barang->id) }}" class="stretched-link text-decoration-none">
-                                {{ $barang->barang_nm }}
-                            </a>
-                        </h5>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-
-
-
-
-    <div class="card shadow" id="cardTable" style="display:none;">
+    <div class="card shadow" id="cardTable">
         <div class="card-header">
             <h4 class="card-title d-inline">Daftar Stok Barang <span id="titleBarang"></span></h4>
             <button class="btn btn-primary btn-sm float-right" id="btnTambah">
                 <i class="fas fa-plus"></i> Tambah Stok
+            </button>
+            <button class="btn btn-primary btn-sm float-right mr-2" id="btnTambahRak">
+                <i class="fas fa-plus"></i> Tambah Rak
             </button>
         </div>
 
@@ -35,177 +19,510 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Barang</th>
+                        <th>Rak</th>
+                        <th>Shaft</th>
+                        <th>Masuk</th>
+                        <th>Keluar</th>
                         <th>Jumlah Stock</th>
                         <th>Tanggal Expired</th>
                         <th>Tanggal Pencatatan</th>
                         <th>Status</th>
                         <th>Aksi</th>
+                        <th>Dibuat Oleh</th>
+                        <th>Diubah Oleh</th>
                     </tr>
                 </thead>
             </table>
         </div>
     </div>
 
+    {{-- Modal Tambah Rak --}}
+    <div class="modal fade" id="modalRak" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formRak" class="modal-content">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Nama Rak</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close"><span>&times;</span></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="nama_rak">Nama Rak</label>
+                        <input type="text" class="form-control" id="nama_rak" name="nama_rak" required>
+                    </div>
+
+                    <label class="mb-2">Jumlah Shaft</label>
+                    <div id="shaftList"></div>
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="btnAddShaft">Tambah</button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Catat Stok (BARU) --}}
+    <div class="modal fade" id="modalCatat" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="formCatat" class="modal-content">
+                @csrf
+                <input type="hidden" name="id" id="id">
+                <input type="hidden" name="barang_id" id="barang_id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Catat Stok <span id="catat_nama_barang" class="text-muted"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+
+                <div class="modal-body">
+                    {{-- (opsional) tampilkan nama barang readonly --}}
+                    <div class="form-group">
+                        <label>Nama Barang</label>
+                        <input type="text" id="catat_nama_barang_input" class="form-control" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Pilih Rak</label>
+                            <select name="rak_id" id="catat_rak_id" class="form-control"
+                                data-shafts-url-template="{{ url('/rak/__RAK_ID__/shafts') }}" required>
+                                <option value="">-- Pilih Rak --</option>
+                                @foreach ($raks as $rak)
+                                    <option value="{{ $rak->id }}">{{ $rak->nama_rak }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div class="form-group col-md-6">
+                            <label>Pilih Shaft</label>
+                            <select name="rak_shaft_id" id="catat_rak_shaft_id" class="form-control" required>
+                                <option value="">-- Pilih Shaft --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Tanggal Pencatatan</label>
+                            <input type="date" name="catat_tgl" id="catat_tgl" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Expired Date</label>
+                            <input type="date" name="exp_tgl" id="exp_tgl" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        {{-- Catat Stock: RADIO + input angka bebas --}}
+                        <div class="form-group col-md-6">
+                            <label class="d-block">Catat Stock</label>
+
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="arah_masuk" name="arah" class="custom-control-input"
+                                    value="masuk" checked>
+                                <label class="custom-control-label" for="arah_masuk">Masuk</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="arah_keluar" name="arah" class="custom-control-input"
+                                    value="keluar">
+                                <label class="custom-control-label" for="arah_keluar">Keluar</label>
+                            </div>
+
+                            <input type="number" name="stok" id="stok" class="form-control mt-2"
+                                placeholder="Jumlah" required>
+                        </div>
+
+                        {{-- Satuan: RADIO --}}
+                        <div class="form-group col-md-6">
+                            <label class="d-block">Satuan</label>
+
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="sat_tablet" name="satuan" class="custom-control-input"
+                                    value="tablet" checked>
+                                <label class="custom-control-label" for="sat_tablet">Tablet</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="sat_strip" name="satuan" class="custom-control-input"
+                                    value="strip">
+                                <label class="custom-control-label" for="sat_strip">Strip</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lokasi</label>
+                        <textarea name="lokasi" id="lokasi" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan</label>
+                        <textarea name="keterangan" id="keterangan" rows="3" class="form-control"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    {{-- Modal Tambah/Edit stok versi lama (tetap boleh dipakai) --}}
     @include('barang_stok.form')
 @endsection
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
-            var selectedBarangId = null;
-            var selectedBarangNm = null;
-            var table = null;
+        $(function() {
 
-            $('.pilih-barang').click(function() {
-                selectedBarangId = $(this).data('id');
-                selectedBarangNm = $(this).find('h5').text();
+            // ===== helper =====
+            function loadShaftsForRak($rakSelect, $shaftSelect, rakId, selectedShaftId = null) {
+                const tmpl = $rakSelect.data('shafts-url-template') || "{{ url('/rak/__RAK_ID__/shafts') }}";
+                const url = tmpl.replace('__RAK_ID__', rakId);
 
-                $('#titleBarang').text('- ' + selectedBarangNm);
-                $('#cardTable').show();
+                $shaftSelect.empty().append('<option value="">-- Pilih Shaft --</option>');
+                if (!rakId) return;
 
-                if (table) {
-                    table.destroy();
+                $.get(url).done(function(rows) {
+                    rows.forEach(function(r) {
+                        const opt = new Option(r.nama_shaft, r.id, false, Number(
+                            selectedShaftId) === Number(r.id));
+                        $shaftSelect.append(opt);
+                    });
+                    // refresh selectpicker jika dipakai
+                    if ($shaftSelect.hasClass('selectpicker') && typeof $shaftSelect.selectpicker ===
+                        'function') {
+                        $shaftSelect.selectpicker('refresh');
+                    }
+                });
+            }
+
+            // ===== SweetAlert2 helpers =====
+            function swalSuccess(msg) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: msg || 'Operasi berhasil.',
+                    confirmButtonText: 'OK'
+                });
+            }
+
+            function swalError(msg) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: msg || 'Terjadi kesalahan.',
+                    confirmButtonText: 'OK'
+                });
+            }
+
+            function swalFromXhr(xhr, fallback = 'Terjadi kesalahan. Periksa input.') {
+                let title = 'Gagal';
+                let text = fallback;
+                let html = '';
+
+                if (xhr && xhr.responseJSON) {
+                    if (xhr.responseJSON.message) {
+                        text = xhr.responseJSON
+                            .message;
+                    }
+                    if (xhr.responseJSON.errors) {
+
+                        const items = [];
+                        Object.keys(xhr.responseJSON.errors).forEach(function(key) {
+                            xhr.responseJSON.errors[key].forEach(function(e) {
+                                items.push(`<li>${e}</li>`);
+                            });
+                        });
+                        if (items.length) {
+                            html = `<ul style="text-align:left;margin-left:1rem;">${items.join('')}</ul>`;
+                        }
+                    }
                 }
 
-                table = $('#tableBarang').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    ajax: {
-                        url: "{{ route('barangstok.data') }}",
-                        data: function(d) {
-                            d.barang_id = selectedBarangId;
+                Swal.fire({
+                    icon: 'error',
+                    title: title,
+                    text: html ? undefined : text,
+                    html: html || undefined,
+                    confirmButtonText: 'OK'
+                });
+            }
+
+            let selectedBarangId = null;
+            let selectedBarangNm = null;
+
+            const table = $('#tableBarang').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('barangstok.data') }}",
+                    data: function(d) {
+                        d.barang_id = selectedBarangId;
+                    }
+                },
+                dom: 'Bfrtip',
+                buttons: [{
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel fa-lg"></i>',
+                        className: 'btn btn-success btn-sm',
+                        titleAttr: 'Export ke Excel'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf fa-lg"></i>',
+                        className: 'btn btn-danger btn-sm',
+                        titleAttr: 'Export ke PDF'
+                    }
+                ],
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'barang_nm',
+                        name: 'barang_nm'
+                    },
+                    {
+                        data: 'rak_nama',
+                        name: 'rak_nama'
+                    },
+                    {
+                        data: 'shaft_nama',
+                        name: 'shaft_nama'
+                    },
+                    {
+                        data: 'masuk',
+                        name: 'masuk',
+
+                    },
+                    {
+                        data: 'keluar',
+                        name: 'keluar',
+
+                    },
+                    {
+                        data: 'stok',
+                        name: 'stok'
+                    },
+                    {
+                        data: 'exp_tgl',
+                        name: 'exp_tgl'
+                    },
+                    {
+                        data: 'catat_tgl',
+                        name: 'catat_tgl'
+                    },
+                    {
+                        data: 'exp_tgl',
+                        name: 'status',
+                        render: function(data) {
+                            if (!data)
+                                return '<span class="badge bg-secondary">Tidak ada tanggal</span>';
+                            let today = new Date(),
+                                exp = new Date(data);
+                            let diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                            if (diffDays > 60) return '<span class="badge bg-success" title="' +
+                                diffDays + ' hari tersisa">Aman</span>';
+                            if (diffDays > 0) return '<span class="badge bg-danger"  title="' +
+                                diffDays + ' hari tersisa">Hampir Expired</span>';
+                            return '<span class="badge bg-warning" title="Expired">Expired</span>';
                         }
                     },
-                    dom: 'Bfrtip', // <--- ini
-                    buttons: [{
-                            extend: 'excel',
-                            text: '<i class="fas fa-file-excel fa-lg"></i>',
-                            className: 'btn btn-success btn-sm',
-                            titleAttr: 'Export ke Excel'
-                        },
-                        {
-                            extend: 'pdf',
-                            text: '<i class="fas fa-file-pdf fa-lg"></i>',
-                            className: 'btn btn-danger btn-sm',
-                            titleAttr: 'Export ke PDF'
-                        }
-                    ],
-                    columns: [{
-                            data: 'DT_RowIndex',
-                            name: 'DT_RowIndex',
-                            orderable: false,
-                            searchable: false
-                        },
-                        {
-                            data: 'barang_nm',
-                            name: 'barang_nm'
-                        },
-                        {
-                            data: 'stok',
-                            name: 'stok'
-                        },
-                        {
-                            data: 'exp_tgl',
-                            name: 'exp_tgl'
-                        },
-                        {
-                            data: 'catat_tgl',
-                            name: 'catat_tgl'
-                        },
-                        {
-                            data: 'exp_tgl',
-                            name: 'status',
-                            render: function(data, type, row) {
-                                if (!data)
-                                    return '<span class="badge bg-secondary">Tidak ada tanggal</span>';
 
-                                let today = new Date();
-                                let exp = new Date(data);
-                                let diffTime = exp - today;
-                                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                                if (diffDays > 60) {
-                                    return '<span class="badge bg-success" title="' +
-                                        diffDays + ' hari tersisa">Aman</span>';
-                                } else if (diffDays > 0 && diffDays <= 60) {
-                                    return '<span class="badge bg-danger" title="' +
-                                        diffDays + ' hari tersisa">Hampir Expired</span>';
-                                } else {
-                                    return '<span class="badge bg-warning" title="Expired">Expired</span>';
-                                }
-                            }
-                        },
-                        @if (auth()->user()->pegawai->role_id == 1)
-                            {
-                                data: 'aksi',
-                                name: 'aksi',
-                                orderable: false,
-                                searchable: false
-                            },
-                        @endif
-                    ]
-                });
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        orderable: false,
+                        searchable: false
+                    }, {
+                        data: 'created_by',
+                        name: 'created_by'
+                    },
+                    {
+                        data: 'updated_by',
+                        name: 'updated_by'
+                    },
+
+                ]
             });
 
-            // Tambah stok → otomatis bawa barang yang dipilih
-            $('#btnTambah').click(function() {
+            $(document).on('click', '.pilih-barang', function() {
+                selectedBarangId = $(this).data('id');
+                selectedBarangNm = $(this).find('h5').text();
+                $('#titleBarang').text('- ' + selectedBarangNm);
+                table.ajax.reload();
+            });
+
+            // ===== Modal Tambah (lama) =====
+            $('#btnTambah').on('click', function() {
                 $('#formBarang')[0].reset();
                 $('#id').val('');
-                $('#barang_id').val(selectedBarangId);
-                $('#modalBarang .modal-title').text('Tambah Stok Barang - ' + selectedBarangNm);
+                $('#barang_id').val(selectedBarangId || '');
+                $('#modalBarang .modal-title').text('Tambah Stok Barang' + (selectedBarangNm ? (' - ' +
+                    selectedBarangNm) : ''));
                 $('#modalBarang').modal('show');
             });
 
-            $('body').on('click', '.btn-edit', function() {
-                var id = $(this).data('id');
-                $.get("/stock-barang/edit/" + id, function(data) {
-                    $('#id').val(data.id);
-                    $('#barang_id').val(data.barang_id);
-                    $('#stok').val(data.stok);
-                    $('#exp_tgl').val(data.exp_tgl);
-                    $('#catat_tgl').val(data.catat_tgl);
-                    $('#modalBarang .modal-title').text('Edit Stok Barang');
-                    $('#modalBarang').modal('show');
+            $('#modalBarang').on('change', '#rak_id', function() {
+                loadShaftsForRak($('#modalBarang #rak_id'), $('#modalBarang #rak_shaft_id'), $(this).val(),
+                    null);
+            });
+
+            // ===== CATAT STOK (modal baru) =====
+            $('body').on('click', '.btn-catat', function() {
+                const barangId = $(this).data('barang-id');
+                const barangNm = $(this).data('barang-nm') || '';
+
+                $('#formCatat')[0].reset();
+                $('#barang_id').val(barangId);
+                $('#catat_tgl').val(new Date().toISOString().slice(0, 10));
+                $('#catat_nama_barang').text(' - ' + barangNm);
+                $('#catat_nama_barang_input').val(barangNm);
+                $('#catat_rak_shaft_id').html('<option value="">-- Pilih Shaft --</option>');
+
+                $.get("{{ route('barangstok.showBarang', ['id' => '___ID___']) }}".replace('___ID___',
+                        barangId))
+                    .done(function(res) {
+                        // ambil rak/shaft dari mst_barang; fallback ke relasi
+                        const rakId = (res.rak_id ?? (res.rak && res.rak.id)) || '';
+                        const shaftId = (res.rak_shaft_id ?? (res.rak_shaft && res.rak_shaft.id)) || '';
+
+                        $('#catat_rak_id').val(rakId); // set rak
+                        loadShaftsForRak($('#catat_rak_id'), $('#catat_rak_shaft_id'), rakId,
+                            shaftId); // isi & pilih shaft
+
+                        $('#modalCatat').modal('show');
+                        setTimeout(() => $('#stok').trigger('focus'), 150);
+                    })
+                    .fail(function(xhr) {
+                        console.error('Gagal load master barang:', xhr.status, xhr.responseText);
+                        alert('Gagal memuat detail barang.');
+                    });
+            });
+
+            // jika rak diubah manual oleh user pada modal Catat
+            $('#modalCatat').on('change', '#catat_rak_id', function() {
+                loadShaftsForRak($('#catat_rak_id'), $('#catat_rak_shaft_id'), $(this).val(), null);
+            });
+
+            $('#formCatat').on('submit', function(e) {
+                e.preventDefault();
+                $.post("/stock-barang/store", $(this).serialize())
+                    .done(function(res) {
+                        if (res.success) {
+                            $('#modalCatat').modal('hide');
+                            $('#tableBarang').DataTable().ajax.reload();
+                            swalSuccess(res.message); // << pesan dari controller
+                        } else {
+                            swalError(res.message || 'Gagal menyimpan catatan stok');
+                        }
+                    })
+                    .fail(function(xhr) {
+                        swalFromXhr(xhr,
+                            'Gagal menyimpan catatan stok');
+                    });
+            });
+
+
+
+            // ===== Delete row =====
+            $('body').on('click', '.btn-delete', function() {
+                const id = $(this).data('id');
+                if (!confirm('Yakin ingin menghapus data ini?')) return;
+                $.ajax({
+                    url: "/stock-barang/delete/" + id,
+                    type: 'DELETE',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    }
+                }).done(function(res) {
+                    table.ajax.reload();
+                    alert(res.message);
                 });
             });
 
-            // Hapus Stok
-            $('body').on('click', '.btn-delete', function() {
-                var id = $(this).data('id');
-                if (confirm('Yakin ingin menghapus data ini?')) {
-                    $.ajax({
-                        url: "/stock-barang/delete/" + id,
-                        type: 'DELETE',
-                        data: {
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function(res) {
-                            table.ajax.reload();
-                            alert(res.message);
-                        }
-                    });
-                }
-            });
-
-            // Submit form
-            $('#formBarang').submit(function(e) {
+            // ===== Submit form Tambah/Edit (modal lama) =====
+            $('#formBarang').on('submit', function(e) {
                 e.preventDefault();
-                $.ajax({
-                    url: "/stock-barang/store",
-                    method: "POST",
-                    data: $(this).serialize(),
-                    success: function(res) {
+                $.post("/stock-barang/store", $(this).serialize())
+                    .done(function(res) {
                         if (res.success) {
                             $('#modalBarang').modal('hide');
                             table.ajax.reload();
-                            alert(res.message);
+                            swalSuccess(res.message);
+                        } else {
+                            swalError(res.message || 'Gagal menyimpan data');
                         }
-                    },
-                    error: function(err) {
-                        alert('Terjadi kesalahan. Silakan cek inputan.');
-                    }
-                });
+                    })
+                    .fail(function(xhr) {
+                        swalFromXhr(xhr, 'Terjadi kesalahan. Silakan cek inputan.');
+                    });
             });
-        });
+
+
+
+            // ===== Modal Tambah Rak + Shafts =====
+            const $modalRak = $('#modalRak');
+            const $shaftList = $('#shaftList');
+
+            function shaftRow(value = '') {
+                return (
+                    '<div class="input-group mb-2 shaft-row">' +
+                    '<input type="text" name="shafts[]" class="form-control" placeholder="Nama Shaft" value="' +
+                    (value || '') + '" required>' +
+                    '<div class="input-group-append">' +
+                    '<button class="btn btn-outline-danger btn-hapus-shaft" type="button">Hapus</button>' +
+                    '</div>' +
+                    '</div>'
+                );
+            }
+
+            $('#btnTambahRak').on('click', function() {
+                $('#formRak')[0].reset();
+                $shaftList.empty().append(shaftRow());
+                $modalRak.modal('show');
+            });
+
+            $('#btnAddShaft').on('click', function() {
+                $shaftList.append(shaftRow());
+            });
+
+            $shaftList.on('click', '.btn-hapus-shaft', function() {
+                const total = $shaftList.find('.shaft-row').length;
+                if (total > 1) $(this).closest('.shaft-row').remove();
+                else $(this).closest('.shaft-row').find('input').val('').focus();
+            });
+
+            $('#formRak').on('submit', function(e) {
+                e.preventDefault();
+                $.post("{{ route('rak.store') }}", $(this).serialize())
+                    .done(function(res) {
+                        if (res.success) {
+                            $modalRak.modal('hide');
+                            alert(res.message || 'Rak berhasil disimpan');
+                        } else {
+                            alert(res.message || 'Gagal menyimpan rak');
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.error('Rak store error:', xhr.status, xhr.responseText);
+                        alert('Terjadi kesalahan. Periksa input.');
+                    });
+            });
+
+
+        }); // end document ready
     </script>
 @endpush

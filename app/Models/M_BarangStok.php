@@ -8,7 +8,12 @@ class M_BarangStok extends Model
       protected $table = 'dat_stok';
     protected $fillable = [
         'barang_id',
-        'stok',
+        'stok',        
+        'masuk',       
+        'keluar',     
+        'satuan',      
+        'lokasi',
+        'keterangan',
         'exp_tgl',    
         'catat_tgl',  
         'created_by',

@@ -9,6 +9,7 @@ use App\Http\Controllers\MemberController;
 use App\Exports\BarangStokExport;
 use App\Http\Controllers\LogPencatatanController;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request; // tambahkan ini di atas
 
 
 Route::get('/login', [AuthController::class, 'index'])->name('login');
@@ -24,10 +25,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/stock-barang', [BarangStokController::class, 'inputStock'])->name('barangstok.input_stock');
     Route::get('/stock-barang/data', [BarangStokController::class, 'getData'])->name('barangstok.data');
     Route::post('/stock-barang/store', [BarangStokController::class, 'store'])->name('barangstok.store');
+    Route::get('/stock-barang/{barang}/history', [BarangStokController::class, 'historyPage'])->whereNumber('barang')->name('barangstok.historyPage');
+    Route::get   ('/stock-barang/history/{id}/edit',  [BarangStokController::class,'historyEdit'])->name('barangstok.history.edit');
+    Route::post  ('/stock-barang/history/{id}',       [BarangStokController::class,'historyUpdate'])->name('barangstok.history.update');
+    Route::delete('/stock-barang/history/{id}',       [BarangStokController::class,'historyDestroy'])->name('barangstok.history.destroy');
+
+    // DataTables histori (AJAX)
+    Route::get('/stock-barang/history', [BarangStokController::class, 'history'])
+        ->name('barangstok.history');
     Route::get('/stock-barang/edit/{id}', [BarangStokController::class, 'edit'])->name('barangstok.edit');
     Route::post('/stock-barang/update/{id}', [BarangStokController::class, 'update'])->name('barangstok.update');
     Route::delete('/stock-barang/delete/{id}', [BarangStokController::class, 'destroy'])->name('barangstok.delete');
-    Route::get('/stock-barang/{id}', [BarangStokController::class, 'showBarang'])->name('barangstok.show');
+    Route::post('/rak/store', [BarangStokController::class, 'storeRak'])->name('rak.store');
+
 
     Route::get('/logstok-barang', [LogPencatatanController::class, 'inputStock'])->name('logstok.input_stock');
     Route::get('/logstok-barang/data', [LogPencatatanController::class, 'getData'])->name('logstok.data');
@@ -36,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logstok-barang/update/{id}', [LogPencatatanController::class, 'update'])->name('logstok.update');
     Route::delete('/logstok-barang/delete/{id}', [LogPencatatanController::class, 'destroy'])->name('logstok.delete');
     Route::get('/logstok-barang/{id}', [LogPencatatanController::class, 'showBarang'])->name('logstok.show');
+
 
 
     Route::get('/stock-barang/export', function (Request $request) {
@@ -67,5 +78,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit/{id}', [MemberController::class,'edit'])->name('edit');
         Route::delete('/delete/{id}', [MemberController::class,'destroy'])->name('delete');
     });
+
+        Route::get('/rak/{rak}/shafts', [BarangStokController::class, 'getShafts'])->name('rak.shafts');
+        Route::get('/stock-barang/barang/{id}', [\App\Http\Controllers\BarangStokController::class, 'showBarang'])->name('barangstok.showBarang');
+
 
 });
