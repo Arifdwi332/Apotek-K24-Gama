@@ -21,15 +21,19 @@
                         <th>Nama Barang</th>
                         <th>Rak</th>
                         <th>Shaft</th>
-                        <th>Masuk</th>
-                        <th>Keluar</th>
+                        @if (is_admin())
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                        @endif
                         <th>Jumlah Stock</th>
                         <th>Tanggal Expired</th>
                         <th>Tanggal Pencatatan</th>
                         <th>Status</th>
+                        @if (is_admin())
+                            <th>Dibuat Oleh</th>
+                            <th>Diubah Oleh</th>
+                        @endif
                         <th>Aksi</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Diubah Oleh</th>
                     </tr>
                 </thead>
             </table>
@@ -257,8 +261,83 @@
                 });
             }
 
+            const IS_ADMIN = @json(is_admin());
+
             let selectedBarangId = null;
             let selectedBarangNm = null;
+
+            // Susun kolom secara dinamis
+            const columns = [{
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'barang_nm',
+                    name: 'barang_nm'
+                },
+                {
+                    data: 'rak_nama',
+                    name: 'rak_nama'
+                },
+                {
+                    data: 'shaft_nama',
+                    name: 'shaft_nama'
+                },
+            ];
+
+            if (IS_ADMIN) {
+                columns.push({
+                    data: 'masuk',
+                    name: 'masuk'
+                }, {
+                    data: 'keluar',
+                    name: 'keluar'
+                }, );
+            }
+
+            columns.push({
+                data: 'stok',
+                name: 'stok'
+            }, {
+                data: 'exp_tgl',
+                name: 'exp_tgl'
+            }, {
+                data: 'catat_tgl',
+                name: 'catat_tgl'
+            }, {
+                data: 'exp_tgl',
+                name: 'status',
+                render: function(data) {
+                    if (!data) return '<span class="badge bg-secondary">Tidak ada tanggal</span>';
+                    const today = new Date();
+                    const exp = new Date(data);
+                    const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                    if (diffDays > 60) return '<span class="badge bg-success" title="' + diffDays +
+                        ' hari tersisa">Aman</span>';
+                    if (diffDays > 0) return '<span class="badge bg-danger"  title="' + diffDays +
+                        ' hari tersisa">Hampir Expired</span>';
+                    return '<span class="badge bg-warning">Expired</span>';
+                }
+            });
+
+            if (IS_ADMIN) {
+                columns.push({
+                    data: 'created_by',
+                    name: 'created_by'
+                }, {
+                    data: 'updated_by',
+                    name: 'updated_by'
+                }, );
+            }
+
+            columns.push({
+                data: 'aksi',
+                name: 'aksi',
+                orderable: false,
+                searchable: false
+            }, );
 
             const table = $('#tableBarang').DataTable({
                 processing: true,
@@ -283,79 +362,7 @@
                         titleAttr: 'Export ke PDF'
                     }
                 ],
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'barang_nm',
-                        name: 'barang_nm'
-                    },
-                    {
-                        data: 'rak_nama',
-                        name: 'rak_nama'
-                    },
-                    {
-                        data: 'shaft_nama',
-                        name: 'shaft_nama'
-                    },
-                    {
-                        data: 'masuk',
-                        name: 'masuk',
-
-                    },
-                    {
-                        data: 'keluar',
-                        name: 'keluar',
-
-                    },
-                    {
-                        data: 'stok',
-                        name: 'stok'
-                    },
-                    {
-                        data: 'exp_tgl',
-                        name: 'exp_tgl'
-                    },
-                    {
-                        data: 'catat_tgl',
-                        name: 'catat_tgl'
-                    },
-                    {
-                        data: 'exp_tgl',
-                        name: 'status',
-                        render: function(data) {
-                            if (!data)
-                                return '<span class="badge bg-secondary">Tidak ada tanggal</span>';
-                            let today = new Date(),
-                                exp = new Date(data);
-                            let diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-                            if (diffDays > 60) return '<span class="badge bg-success" title="' +
-                                diffDays + ' hari tersisa">Aman</span>';
-                            if (diffDays > 0) return '<span class="badge bg-danger"  title="' +
-                                diffDays + ' hari tersisa">Hampir Expired</span>';
-                            return '<span class="badge bg-warning" title="Expired">Expired</span>';
-                        }
-                    },
-
-
-                    {
-                        data: 'aksi',
-                        name: 'aksi',
-                        orderable: false,
-                        searchable: false
-                    }, {
-                        data: 'created_by',
-                        name: 'created_by'
-                    },
-                    {
-                        data: 'updated_by',
-                        name: 'updated_by'
-                    },
-
-                ]
+                columns: columns
             });
 
             $(document).on('click', '.pilih-barang', function() {
@@ -520,6 +527,49 @@
                         console.error('Rak store error:', xhr.status, xhr.responseText);
                         alert('Terjadi kesalahan. Periksa input.');
                     });
+            });
+
+            // Hapus master barang + seluruh histori
+            $('body').on('click', '.btn-del-barang', function() {
+                const barangId = $(this).data('barang-id');
+                const nama = $(this).data('barang-nm') || 'barang';
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Hapus barang?',
+                    html: `Anda akan menghapus <b>${nama}</b>.<br><span class="text-danger">Semua histori stok terkait juga akan dihapus.</span>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                }).then((res) => {
+                    if (!res.isConfirmed) return;
+
+                    $.ajax({
+                            url: "{{ route('mst.barang.hapus', ':id') }}".replace(':id',
+                                barangId),
+                            type: 'DELETE',
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            }
+                        })
+                        .done(function(resp) {
+                            $('#tableBarang').DataTable().ajax.reload(null, false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: resp.message || 'Berhasil menghapus.'
+                            });
+                        })
+                        .fail(function(xhr) {
+                            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr
+                                .responseJSON.message : 'Gagal menghapus barang.';
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: msg
+                            });
+                        });
+                });
             });
 
 

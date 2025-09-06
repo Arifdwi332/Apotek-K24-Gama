@@ -16,22 +16,26 @@
                         <label for="barang_nm">Nama Barang</label>
                         <input type="text" name="barang_nm" id="barang_nm" class="form-control"
                             placeholder="Tulis nama barang..." required>
-                        <small class="form-text text-muted">Jika sudah pernah dibuat, ketik nama yang sama untuk
-                            menghindari duplikasi.</small>
+
                     </div>
+                    <div class="form-group">
+                        <label for="barang_nm">Rak</label>
+                        <select name="rak_id" id="rak_id" class="form-control"
+                            data-shafts-url-template="{{ route('rak.shafts', ['rak' => '__RAK_ID__']) }}">
+                            <option value="">-- Pilih Rak --</option>
+                            @foreach ($raks as $rak)
+                                <option value="{{ $rak->id }}">{{ $rak->nama_rak }}</option>
+                            @endforeach
+                        </select>
+                        <input type="radio" id="arah_masuk" name="arah" value="masuk" checked hidden>
 
-                    <select name="rak_id" id="rak_id" class="form-control"
-                        data-shafts-url-template="{{ route('rak.shafts', ['rak' => '__RAK_ID__']) }}">
-                        <option value="">-- Pilih Rak --</option>
-                        @foreach ($raks as $rak)
-                            <option value="{{ $rak->id }}">{{ $rak->nama_rak }}</option>
-                        @endforeach
-                    </select>
-
-                    <select name="rak_shaft_id" id="rak_shaft_id" class="form-control">
-                        <option value="">-- Pilih Shaft --</option>
-                    </select>
-
+                    </div>
+                    <div class="form-group">
+                        <label for="barang_nm">Shaft</label>
+                        <select name="rak_shaft_id" id="rak_shaft_id" class="form-control">
+                            <option value="">-- Pilih Shaft --</option>
+                        </select>
+                    </div>
 
 
                     <div class="form-group">

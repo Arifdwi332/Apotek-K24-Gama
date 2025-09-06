@@ -70,9 +70,16 @@ class BarangStokController extends Controller
                     style="white-space:nowrap;">
                     Detail
                 </a>';
+    });  $btnDeleteBarang = only_admin(function () use ($row) {
+        return '<button class="btn btn-sm btn-danger btn-del-barang ml-1"
+                        data-barang-id="'.$row->barang_id.'"
+                        data-barang-nm="'.e($row->mstBarang->barang_nm ?? '').'"
+                        style="white-space:nowrap;">
+                    Hapus
+                </button>';
     });
 
-    return '<div class="d-inline-flex">'.$btnCatat.$btnDetail.'</div>';
+    return '<div class="d-inline-flex">'.$btnCatat.$btnDetail.$btnDeleteBarang.'</div>';
 })
 
 
@@ -405,6 +412,22 @@ class BarangStokController extends Controller
         return response()->json($rak->shafts()->select('id','nama_shaft')->orderBy('nama_shaft')->get());
     }
 
-   
+   public function hapus($id)
+{
+    DB::transaction(function () use ($id) {
+        $barang = M_MstBarang::lockForUpdate()->findOrFail($id);
+
+        // hapus semua histori stok
+        M_BarangStok::where('barang_id', $barang->id)->delete();
+
+        // hapus master
+        $barang->delete();
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Barang dan seluruh histori berhasil dihapus.'
+    ]);
+}
 
 }
