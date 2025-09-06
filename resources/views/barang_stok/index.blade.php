@@ -11,6 +11,10 @@
             <button class="btn btn-primary btn-sm float-right mr-2" id="btnTambahRak">
                 <i class="fas fa-plus"></i> Tambah Rak
             </button>
+            <button class="btn btn-secondary btn-sm float-right mr-2" id="btnListRakBarang">
+                <i class="fas fa-list-ul"></i> Lihat Rak & Barang
+            </button>
+
         </div>
 
         <div class="card-body">
@@ -177,9 +181,42 @@
             </form>
         </div>
     </div>
+    <div class="modal fade" id="modalRakBarang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Lihat List Rak dan Barang</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0" id="tblRakBarang">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width:60px;">No</th>
+                                    <th style="width:160px;">Nama Rak</th>
+                                    <th style="width:140px;">Shaft</th>
+                                    <th>Daftar Barang</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="text-center">Memuat…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-    {{-- Modal Tambah/Edit stok versi lama (tetap boleh dipakai) --}}
     @include('barang_stok.form')
 @endsection
 
@@ -571,6 +608,74 @@
                         });
                 });
             });
+            $(function() {
+                // buka modal & load data
+                $('#btnListRakBarang').on('click', function() {
+                    const $tbody = $('#tblRakBarang tbody');
+                    $tbody.html('<tr><td colspan="4" class="text-center">Memuat…</td></tr>');
+                    $('#modalRakBarang').modal('show');
+
+                    $.get("{{ route('rak.list') }}")
+                        .done(function(raks) {
+                            const rows = [];
+                            let no = 1;
+
+                            raks.forEach(function(rak) {
+                                const shafts = rak.shafts || [];
+
+                                if (shafts.length === 0) {
+                                    // rak tanpa shaft
+                                    rows.push(
+                                        `<tr>
+                <td class="text-center align-middle" rowspan="1">${no}</td>
+                <td class="align-middle" rowspan="1">${rak.nama_rak ?? '-'}</td>
+                <td class="">-</td>
+                <td class="">-</td>
+              </tr>`
+                                    );
+                                    no++;
+                                    return;
+                                }
+
+                                shafts.forEach(function(shaft, idx) {
+                                    const barangList = (shaft.barangs || [])
+                                        .map(b => b.barang_nm).join(' | ') ||
+                                        '-';
+
+                                    if (idx === 0) {
+                                        rows.push(
+                                            `<tr>
+                  <td class="text-center align-middle" rowspan="${shafts.length}">${no}</td>
+                  <td class="align-middle" rowspan="${shafts.length}">${rak.nama_rak ?? '-'}</td>
+                  <td>${shaft.nama_shaft ?? '-'}</td>
+                  <td>${barangList}</td>
+                </tr>`
+                                        );
+                                    } else {
+                                        rows.push(
+                                            `<tr>
+                  <td>${shaft.nama_shaft ?? '-'}</td>
+                  <td>${barangList}</td>
+                </tr>`
+                                        );
+                                    }
+                                });
+
+                                no++;
+                            });
+
+                            $('#tblRakBarang tbody').html(rows.join('') ||
+                                '<tr><td colspan="4" class="text-center">Data kosong</td></tr>'
+                            );
+                        })
+                        .fail(function() {
+                            $('#tblRakBarang tbody').html(
+                                '<tr><td colspan="4" class="text-center text-danger">Gagal memuat data</td></tr>'
+                            );
+                        });
+                });
+            });
+
 
 
         }); // end document ready

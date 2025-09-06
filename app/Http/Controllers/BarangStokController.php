@@ -430,4 +430,16 @@ class BarangStokController extends Controller
     ]);
 }
 
+public function listRakBarang()
+{
+    $raks = \App\Models\M_Rak::with([
+        'shafts' => fn($q) => $q->orderBy('nama_shaft'),
+        'shafts.barangs' => fn($q) => $q->select('id','barang_nm','rak_shaft_id')->orderBy('barang_nm'),
+    ])->orderBy('nama_rak')
+      ->get(['id','nama_rak']);
+
+    return response()->json($raks);
+}
+
+
 }

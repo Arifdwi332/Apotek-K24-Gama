@@ -82,8 +82,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/rak/{rak}/shafts', [BarangStokController::class, 'getShafts'])->name('rak.shafts');
         Route::get('/stock-barang/barang/{id}', [\App\Http\Controllers\BarangStokController::class, 'showBarang'])->name('barangstok.showBarang');
         Route::prefix('mst')->name('mst.')->group(function () {
-        Route::delete('/barang/{id}/hapus', [BarangStokController::class, 'hapus'])
-            ->name('barang.hapus');   
-    });
+            Route::delete('/barang/{id}/hapus', [BarangStokController::class, 'hapus'])
+                ->name('barang.hapus');   
+        });
+        Route::get('/rak/list-rak-barang', [\App\Http\Controllers\BarangStokController::class, 'listRakBarang'])
+         ->name('rak.list');
 
 });

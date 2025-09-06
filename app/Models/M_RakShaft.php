@@ -14,4 +14,8 @@ class M_RakShaft extends Model
     {
         return $this->belongsTo(M_Rak::class, 'rak_id');
     }
+    public function barangs()
+{
+    return $this->hasMany(\App\Models\M_MstBarang::class, 'rak_shaft_id');
+}
 }
