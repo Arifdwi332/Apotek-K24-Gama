@@ -6,10 +6,12 @@ use Yajra\DataTables\Facades\DataTables;
 
 use App\Models\M_BarangStok;
 use App\Models\M_Rak;
+use App\Models\M_User;
 use App\Models\M_RakShaft;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BarangStokController extends Controller
 {
@@ -19,78 +21,77 @@ class BarangStokController extends Controller
         return view('barang_stok.index', compact('raks'));
     }
 
-  public function getData(Request $request)
-{
-    $bsTable = (new M_BarangStok)->getTable(); // 'dat_stok'
+    public function getData(Request $request)
+    {
+        $bsTable = (new M_BarangStok)->getTable(); // 'dat_stok'
 
-    $latestDates = DB::table($bsTable.' as t')
-        ->select('t.barang_id', DB::raw('MAX(t.catat_tgl) as max_catat'))
-        ->when($request->barang_id, fn($q) => $q->where('t.barang_id', $request->barang_id))
-        ->groupBy('t.barang_id');
+        $latestDates = DB::table($bsTable.' as t')
+            ->select('t.barang_id', DB::raw('MAX(t.catat_tgl) as max_catat'))
+            ->when($request->barang_id, fn($q) => $q->where('t.barang_id', $request->barang_id))
+            ->groupBy('t.barang_id');
 
-    $latestIds = DB::table($bsTable.' as t')
-        ->joinSub($latestDates, 'ld', function ($join) {
-            $join->on('t.barang_id', '=', 'ld.barang_id')
-                 ->on('t.catat_tgl', '=', 'ld.max_catat');
-        })
-        ->select('t.barang_id', DB::raw('MAX(t.id) as last_id'))
-        ->groupBy('t.barang_id');
+        $latestIds = DB::table($bsTable.' as t')
+            ->joinSub($latestDates, 'ld', function ($join) {
+                $join->on('t.barang_id', '=', 'ld.barang_id')
+                    ->on('t.catat_tgl', '=', 'ld.max_catat');
+            })
+            ->select('t.barang_id', DB::raw('MAX(t.id) as last_id'))
+            ->groupBy('t.barang_id');
 
-    $query = M_BarangStok::from($bsTable.' as bs')
-        ->joinSub($latestIds, 'lx', function ($join) {
-            $join->on('bs.barang_id', '=', 'lx.barang_id')
-                 ->on('bs.id', '=', 'lx.last_id');
-        })
-        ->with(['mstBarang.rak','mstBarang.rakShaft','createdBy','updatedBy'])
-        ->select('bs.*');
+        $query = M_BarangStok::from($bsTable.' as bs')
+            ->joinSub($latestIds, 'lx', function ($join) {
+                $join->on('bs.barang_id', '=', 'lx.barang_id')
+                    ->on('bs.id', '=', 'lx.last_id');
+            })
+            ->with(['mstBarang.rak','mstBarang.rakShaft','createdBy','updatedBy'])
+            ->select('bs.*');
 
-    if ($request->filled('barang_id')) {
-        $query->where('bs.barang_id', $request->barang_id);
+        if ($request->filled('barang_id')) {
+            $query->where('bs.barang_id', $request->barang_id);
+        }
+
+
+    return DataTables::of($query)
+        ->addIndexColumn()
+        ->addColumn('barang_nm',  fn($row) => $row->mstBarang->barang_nm ?? '-')
+        ->editColumn('created_by', fn($row) => only_admin(fn() => get_user($row->created_by)))
+        ->editColumn('updated_by', fn($row) => only_admin(fn() => get_user($row->updated_by)))
+        ->addColumn('rak_nama',   fn($row) => optional($row->mstBarang->rak)->nama_rak ?? '-')
+        ->addColumn('shaft_nama', fn($row) => optional($row->mstBarang->rakShaft)->nama_shaft ?? '-')
+    ->addColumn('aksi', function ($row) {
+        $btnCatat = '<button class="btn btn-sm btn-info btn-catat mr-1"
+                            data-barang-id="'.$row->barang_id.'"
+                            data-barang-nm="'.e($row->mstBarang->barang_nm ?? '').'"
+                            style="white-space:nowrap;">
+                        Catat Stok
+                    </button>';
+
+        $btnDetail = only_admin(function () use ($row) {
+            return '<a href="'.route('barangstok.historyPage', ['barang' => $row->barang_id]).'"
+                        class="btn btn-sm btn-primary"
+                        style="white-space:nowrap;">
+                        Detail
+                    </a>';
+        });  $btnDeleteBarang = only_admin(function () use ($row) {
+            return '<button class="btn btn-sm btn-danger btn-del-barang ml-1"
+                            data-barang-id="'.$row->barang_id.'"
+                            data-barang-nm="'.e($row->mstBarang->barang_nm ?? '').'"
+                            style="white-space:nowrap;">
+                        Hapus
+                    </button>';
+        });
+
+        return '<div class="d-inline-flex">'.$btnCatat.$btnDetail.$btnDeleteBarang.'</div>';
+    })
+
+
+
+
+        ->rawColumns(['aksi'])
+        ->make(true);
+
     }
 
-
-   return DataTables::of($query)
-    ->addIndexColumn()
-    ->addColumn('barang_nm',  fn($row) => $row->mstBarang->barang_nm ?? '-')
-    ->editColumn('created_by', fn($row) => only_admin(fn() => get_user($row->created_by)))
-    ->editColumn('updated_by', fn($row) => only_admin(fn() => get_user($row->updated_by)))
-    ->addColumn('rak_nama',   fn($row) => optional($row->mstBarang->rak)->nama_rak ?? '-')
-    ->addColumn('shaft_nama', fn($row) => optional($row->mstBarang->rakShaft)->nama_shaft ?? '-')
- ->addColumn('aksi', function ($row) {
-    $btnCatat = '<button class="btn btn-sm btn-info btn-catat mr-1"
-                        data-barang-id="'.$row->barang_id.'"
-                        data-barang-nm="'.e($row->mstBarang->barang_nm ?? '').'"
-                        style="white-space:nowrap;">
-                    Catat Stok
-                 </button>';
-
-    $btnDetail = only_admin(function () use ($row) {
-        return '<a href="'.route('barangstok.historyPage', ['barang' => $row->barang_id]).'"
-                    class="btn btn-sm btn-primary"
-                    style="white-space:nowrap;">
-                    Detail
-                </a>';
-    });  $btnDeleteBarang = only_admin(function () use ($row) {
-        return '<button class="btn btn-sm btn-danger btn-del-barang ml-1"
-                        data-barang-id="'.$row->barang_id.'"
-                        data-barang-nm="'.e($row->mstBarang->barang_nm ?? '').'"
-                        style="white-space:nowrap;">
-                    Hapus
-                </button>';
-    });
-
-    return '<div class="d-inline-flex">'.$btnCatat.$btnDetail.$btnDeleteBarang.'</div>';
-})
-
-
-
-
-    ->rawColumns(['aksi'])
-    ->make(true);
-
-}
-
-// App\Http\Controllers\BarangStokController.php
 
 
     public function store(Request $request)
@@ -413,32 +414,123 @@ class BarangStokController extends Controller
     }
 
    public function hapus($id)
+    {
+        DB::transaction(function () use ($id) {
+            $barang = M_MstBarang::lockForUpdate()->findOrFail($id);
+
+            // hapus semua histori stok
+            M_BarangStok::where('barang_id', $barang->id)->delete();
+
+            // hapus master
+            $barang->delete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Barang dan seluruh histori berhasil dihapus.'
+        ]);
+    }
+
+    public function listRakBarang()
+    {
+        $raks = \App\Models\M_Rak::with([
+            'shafts' => fn($q) => $q->orderBy('nama_shaft'),
+            'shafts.barangs' => fn($q) => $q->select('id','barang_nm','rak_shaft_id')->orderBy('barang_nm'),
+        ])->orderBy('nama_rak')
+        ->get(['id','nama_rak']);
+
+        return response()->json($raks);
+    }
+
+   public function reportPage()
+    {
+        $raks = M_Rak::orderBy('nama_rak')->get(['id','nama_rak']);
+        $barangList = M_MstBarang::orderBy('barang_nm')->get(['id','barang_nm']);
+        $userList   = M_User::orderBy('username')->get(['id','username']);
+
+        return view('report.index', compact('raks','barangList','userList'));
+    }
+
+
+   public function reportData(Request $r)
 {
-    DB::transaction(function () use ($id) {
-        $barang = M_MstBarang::lockForUpdate()->findOrFail($id);
+    $bsTable = (new M_BarangStok)->getTable(); // 'dat_stok'
 
-        // hapus semua histori stok
-        M_BarangStok::where('barang_id', $barang->id)->delete();
+    $q = M_BarangStok::from($bsTable.' as bs')
+        ->with(['mstBarang.rak','mstBarang.rakShaft','createdBy','updatedBy'])
+        ->join('mst_barang as mb','mb.id','=','bs.barang_id')
+        ->select('bs.*');
 
-        // hapus master
-        $barang->delete();
+    // ====== FILTERS ======
+    if ($r->filled('tgl_mulai'))    $q->whereDate('bs.catat_tgl','>=',$r->tgl_mulai);
+    if ($r->filled('tgl_selesai'))  $q->whereDate('bs.catat_tgl','<=',$r->tgl_selesai);
+    if ($r->filled('rak_id'))       $q->where('mb.rak_id',$r->rak_id);
+    if ($r->filled('rak_shaft_id')) $q->where('mb.rak_shaft_id',$r->rak_shaft_id);
+
+    // ✅ perbaiki: gunakan $q (bukan $query) dan nama param yg benar
+    if ($r->filled('barang_id'))  $q->where('bs.barang_id', $r->barang_id);
+    if ($r->filled('created_by')) $q->where('bs.created_by', $r->created_by);
+
+   if ($r->filled('status')) {
+    $today      = Carbon::today();
+    $tomorrow   = $today->copy()->addDay();
+    $plus60days = $today->copy()->addDays(60);
+
+
+if ($r->filled('status')) {
+    // Samakan dengan JS:
+    // diffDays = ceil((exp - now)/1 hari)
+    // >60  -> "aman"
+    // 1..60 -> "hampir"
+    // <=0 -> "expired"
+    $now       = Carbon::now();                  // pakai waktu sekarang (bukan today)
+    $todayEod  = $now->copy()->startOfDay();     // untuk batas expired (<= hari ini)
+    $tomorrow  = $now->copy()->addDay()->startOfDay();   // > 0 hari
+    $plus60    = $now->copy()->addDays(60)->startOfDay(); // 60 hari ke depan
+
+    $status = strtolower($r->status);
+
+    $q->where(function ($qq) use ($status, $todayEod, $tomorrow, $plus60) {
+        switch ($status) {
+            case 'aman':
+                // diffDays > 60  ≈ exp_tgl > today + 60 hari
+                $qq->whereNotNull('bs.exp_tgl')
+                   ->whereDate('bs.exp_tgl', '>', $plus60);
+                break;
+
+            case 'hampir':
+                // 1..60 hari  ≈  besok s/d 60 hari ke depan (inklusif)
+                $qq->whereNotNull('bs.exp_tgl')
+                   ->whereDate('bs.exp_tgl', '>=', $tomorrow)
+                   ->whereDate('bs.exp_tgl', '<=', $plus60);
+                break;
+
+            case 'expired':
+                // diffDays <= 0  ≈  exp_tgl <= hari ini
+                $qq->whereNotNull('bs.exp_tgl')
+                   ->whereDate('bs.exp_tgl', '<=', $todayEod);
+                break;
+
+            case 'tanpa':
+                $qq->whereNull('bs.exp_tgl');
+                break;
+        }
     });
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Barang dan seluruh histori berhasil dihapus.'
-    ]);
 }
 
-public function listRakBarang()
-{
-    $raks = \App\Models\M_Rak::with([
-        'shafts' => fn($q) => $q->orderBy('nama_shaft'),
-        'shafts.barangs' => fn($q) => $q->select('id','barang_nm','rak_shaft_id')->orderBy('barang_nm'),
-    ])->orderBy('nama_rak')
-      ->get(['id','nama_rak']);
+}
 
-    return response()->json($raks);
+
+    $q->orderBy('bs.catat_tgl','desc')->orderBy('bs.id','desc');
+
+    return DataTables::of($q)
+        ->addIndexColumn()
+        ->addColumn('barang_nm',  fn($row) => $row->mstBarang->barang_nm ?? '-')
+        ->addColumn('rak_nama',   fn($row) => optional($row->mstBarang->rak)->nama_rak ?? '-')
+        ->addColumn('shaft_nama', fn($row) => optional($row->mstBarang->rakShaft)->nama_shaft ?? '-')
+        ->editColumn('created_by', fn($row) => get_user($row->created_by) ?? ($row->createdBy->nama ?? '-'))
+        ->editColumn('updated_by', fn($row) => get_user($row->updated_by) ?? ($row->updatedBy->nama ?? '-'))
+        ->make(true);
 }
 
 

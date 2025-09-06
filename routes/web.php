@@ -87,5 +87,10 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('/rak/list-rak-barang', [\App\Http\Controllers\BarangStokController::class, 'listRakBarang'])
          ->name('rak.list');
+        // REPORT STOCK
+        Route::get('/stock-barang/report', [BarangStokController::class, 'reportPage'])
+            ->name('barangstok.reportPage');
+        Route::get('/stock-barang/report-data', [BarangStokController::class, 'reportData'])
+            ->name('barangstok.reportData');
 
 });
