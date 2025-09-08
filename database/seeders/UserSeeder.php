@@ -14,8 +14,8 @@ class UserSeeder extends Seeder
             [
                 'username'   => 'admin',
                 'email'      => 'admin@example.com',
-                'password'   => Hash::make('password123'), // ganti sesuai kebutuhan
-                'pegawai_id' => 1, // pastikan ada data pegawai_id = 1 di tabel mst_pegawai
+                'password'   => Hash::make('password123'),
+                'pegawai_id' => 1,
                 'deleted_st' => 0,
                 'created_by' => null,
                 'updated_by' => null,
@@ -25,8 +25,8 @@ class UserSeeder extends Seeder
             [
                 'username'   => 'karyawan',
                 'email'      => 'karyawan@example.com',
-                'password'   => Hash::make('password123'), // ganti sesuai kebutuhan
-                'pegawai_id' => 2, // pastikan ada data pegawai_id = 2 di tabel mst_pegawai
+                'password'   => Hash::make('password123'),
+                'pegawai_id' => 2, 
                 'deleted_st' => 0,
                 'created_by' => null,
                 'updated_by' => null,
