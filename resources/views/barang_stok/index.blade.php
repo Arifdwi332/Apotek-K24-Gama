@@ -18,29 +18,31 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-striped" id="tableBarang" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Barang</th>
-                        <th>Rak</th>
-                        <th>Shaft</th>
-                        @if (is_admin())
-                            <th>Masuk</th>
-                            <th>Keluar</th>
-                        @endif
-                        <th>Jumlah Stock</th>
-                        <th>Tanggal Expired</th>
-                        <th>Tanggal Pencatatan</th>
-                        <th>Status</th>
-                        @if (is_admin())
-                            <th>Dibuat Oleh</th>
-                            <th>Diubah Oleh</th>
-                        @endif
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="tableBarang" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Barang</th>
+                            <th>Rak</th>
+                            <th>Shaft</th>
+                            @if (is_admin())
+                                <th>Masuk</th>
+                                <th>Keluar</th>
+                            @endif
+                            <th>Jumlah Stock</th>
+                            <th>Tanggal Expired</th>
+                            <th>Tanggal Pencatatan</th>
+                            <th>Status</th>
+                            @if (is_admin())
+                                <th>Dibuat Oleh</th>
+                                <th>Diubah Oleh</th>
+                            @endif
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 

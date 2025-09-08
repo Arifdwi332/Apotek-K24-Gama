@@ -214,12 +214,12 @@
                                 <p>Report</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="{{ route('logstok.input_stock') }}" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice"></i>
                                 <p>Log Pencatatan</p>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a href="{{ route('member.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>

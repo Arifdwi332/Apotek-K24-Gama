@@ -73,24 +73,26 @@
             </form>
 
             {{-- TABEL --}}
-            <table class="table table-bordered table-striped" id="tableReport" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Tanggal</th>
-                        <th>Rak</th>
-                        <th>Shaft</th>
-                        <th>Nama Barang</th>
-                        <th>Expired Date</th>
-                        <th>Status</th>
-                        <th>Masuk</th>
-                        <th>Keluar</th>
-                        <th>Sisa</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Diubah Oleh</th>
-                    </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="tableReport" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Rak</th>
+                            <th>Shaft</th>
+                            <th>Nama Barang</th>
+                            <th>Expired Date</th>
+                            <th>Status</th>
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                            <th>Sisa</th>
+                            <th>Dibuat Oleh</th>
+                            <th>Diubah Oleh</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 @endsection
