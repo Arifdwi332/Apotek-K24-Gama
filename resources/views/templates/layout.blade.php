@@ -212,7 +212,22 @@
                                 <p>Stok Barang dan ED</p>
                             </a>
                         </li>
+<<<<<<< HEAD
 
+=======
+                        <li class="nav-item">
+                            <a href="{{ route('barangstok.reportPage') }}" class="nav-link">
+                                <i class="nav-icon fas fa-file-invoice"></i>
+                                <p>Report</p>
+                            </a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <a href="{{ route('logstok.input_stock') }}" class="nav-link">
+                                <i class="nav-icon fas fa-file-invoice"></i>
+                                <p>Log Pencatatan</p>
+                            </a>
+                        </li> -->
+>>>>>>> ec9eae5e3ade5ee7cda95e94a5119687c4e7e895
                         <li class="nav-item">
                             <a href="{{ route('member.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>

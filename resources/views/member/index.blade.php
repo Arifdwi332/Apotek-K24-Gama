@@ -43,26 +43,28 @@
 
         </div>
         <div class="card-body">
-            <table class="table table-bordered table-striped" id="tableMember" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Lengkap</th>
-                        <th>No HP</th>
-                        <th>Jenis Kelamin</th>
-                        <th>Usia</th>
-                        <th>Alamat</th>
-
-                        @if (is_admin())
-                            <th>Dibuat Pada</th>
-                            <th>Dibuat Oleh</th>
-                            <th>Diubah Pada</th>
-                            <th>Diubah Oleh</th>
-                            <th>Aksi</th>
-                        @endif
-                    </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="tableMember" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Lengkap</th>
+                            <th>No HP</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Usia</th>
+                            <th>Alamat</th>
+    
+                            @if (is_admin())
+                                <th>Dibuat Pada</th>
+                                <th>Dibuat Oleh</th>
+                                <th>Diubah Pada</th>
+                                <th>Diubah Oleh</th>
+                                <th>Aksi</th>
+                            @endif
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 
