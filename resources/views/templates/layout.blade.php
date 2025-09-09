@@ -151,9 +151,11 @@
                 <!-- Dark Mode Button -->
                 <li class="nav-item">
                     <a class="nav-link" href="#" role="button">
-                        ADMIN
+                        {{ Auth::user()->pegawai->role->role_nm ?? 'Guest' }}
                     </a>
                 </li>
+
+
             </ul>
 
             <!-- Right navbar links -->
@@ -195,6 +197,8 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
+
+                        {{-- Menu selalu tampil untuk semua --}}
                         <li class="nav-item">
                             <a href="{{ route('dashboard') }}" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
@@ -208,32 +212,38 @@
                                 <p>Stok Barang dan ED</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('barangstok.reportPage') }}" class="nav-link">
-                                <i class="nav-icon fas fa-file-invoice"></i>
-                                <p>Report</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('logstok.input_stock') }}" class="nav-link">
-                                <i class="nav-icon fas fa-file-invoice"></i>
-                                <p>Log Pencatatan</p>
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a href="{{ route('member.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>Member</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('user.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>User</p>
-                            </a>
-                        </li>
+
+                        {{-- Menu khusus admin --}}
+                        @if (is_admin())
+                            <li class="nav-item">
+                                <a href="{{ route('barangstok.reportPage') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-file-invoice"></i>
+                                    <p>Report</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('logstok.input_stock') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-file-invoice"></i>
+                                    <p>Log Pencatatan</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('user.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-users"></i>
+                                    <p>User</p>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
+
                 <!-- /.sidebar-menu -->
 
             </div>
