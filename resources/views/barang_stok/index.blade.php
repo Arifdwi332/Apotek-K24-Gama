@@ -218,6 +218,44 @@
         </div>
     </div>
 
+    <!-- Modal Edit Rak (mirip Tambah Rak) -->
+    <div class="modal fade" id="modalEditRak" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formEditRak" class="modal-content">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="edit_rak_id" name="rak_id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Rak</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close"><span>&times;</span></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_nama_rak">Nama Rak</label>
+                        <input type="text" class="form-control" id="edit_nama_rak" name="nama_rak" required>
+                    </div>
+
+                    <label class="mb-2">Jumlah Shaft</label>
+                    <div id="editShaftList"></div>
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+                        id="btnEditAddShaft">Tambah</button>
+                    <small class="text-muted d-block mt-2">
+                        Menghapus baris shaft di sini akan menghapus shaft di server jika tidak sedang dipakai barang.
+                    </small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     @include('barang_stok.form')
 @endsection
@@ -254,7 +292,8 @@
                     icon: 'success',
                     title: 'Berhasil',
                     text: msg || 'Operasi berhasil.',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+
                 });
             }
 
@@ -638,11 +677,18 @@
                                     // rak tanpa shaft
                                     rows.push(
                                         `<tr>
-                <td class="text-center align-middle" rowspan="1">${no}</td>
-                <td class="align-middle" rowspan="1">${rak.nama_rak ?? '-'}</td>
-                <td class="">-</td>
-                <td class="">-</td>
-              </tr>`
+                                            <td class="text-center align-middle" rowspan="1">${no}</td>
+                                            <td class="align-middle" rowspan="1">
+                                            ${rak.nama_rak ?? '-'}
+                                            <div class="mt-1">
+                                                <button class="btn btn-xs btn-outline-primary btn-edit-rak" data-id="${rak.id}">
+                                                <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </div>
+                                            </td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>`
                                     );
                                     no++;
                                     return;
@@ -656,24 +702,32 @@
                                     if (idx === 0) {
                                         rows.push(
                                             `<tr>
-                  <td class="text-center align-middle" rowspan="${shafts.length}">${no}</td>
-                  <td class="align-middle" rowspan="${shafts.length}">${rak.nama_rak ?? '-'}</td>
-                  <td>${shaft.nama_shaft ?? '-'}</td>
-                  <td>${barangList}</td>
-                </tr>`
+                                            <td class="text-center align-middle" rowspan="${shafts.length}">${no}</td>
+                                            <td class="align-middle" rowspan="${shafts.length}">
+                                                ${rak.nama_rak ?? '-'}
+                                                <div class="mt-1">
+                                                <button class="btn btn-xs btn-outline-primary btn-edit-rak" data-id="${rak.id}">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                                </div>
+                                            </td>
+                                            <td>${shaft.nama_shaft ?? '-'}</td>
+                                            <td>${barangList}</td>
+                                            </tr>`
                                         );
                                     } else {
                                         rows.push(
                                             `<tr>
-                  <td>${shaft.nama_shaft ?? '-'}</td>
-                  <td>${barangList}</td>
-                </tr>`
+                                                <td>${shaft.nama_shaft ?? '-'}</td>
+                                                <td>${barangList}</td>
+                                            </tr>`
                                         );
                                     }
                                 });
 
                                 no++;
                             });
+
 
                             $('#tblRakBarang tbody').html(rows.join('') ||
                                 '<tr><td colspan="4" class="text-center">Data kosong</td></tr>'
@@ -685,6 +739,102 @@
                             );
                         });
                 });
+            });
+
+            function editShaftRow(id = '', value = '') {
+                return `
+                    <div class="input-group mb-2 edit-shaft-row">
+                    <input type="hidden" class="shaft-id" value="${id || ''}">
+                    <input type="text" class="form-control shaft-name" placeholder="Nama Shaft" value="${value || ''}" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger btn-edit-hapus-shaft" type="button">Hapus</button>
+                    </div>
+                    </div>
+                `;
+            }
+
+            function renumberShaftInputs() {
+                $('#editShaftList .edit-shaft-row').each(function(i) {
+                    $(this).find('.shaft-id').attr('name', `shafts[${i}][id]`);
+                    $(this).find('.shaft-name').attr('name', `shafts[${i}][nama_shaft]`);
+                });
+            }
+
+
+            const $modalEditRak = $('#modalEditRak');
+            const $editShaftList = $('#editShaftList');
+
+            $('body').on('click', '.btn-edit-rak', function() {
+                const id = $(this).data('id');
+                $('#formEditRak')[0].reset();
+                $('#edit_rak_id').val(id);
+                $editShaftList.empty();
+
+                $.get("{{ route('rak.show', ':id') }}".replace(':id', id))
+                    .done(function(res) {
+                        // isi form
+                        $('#edit_nama_rak').val(res.nama_rak);
+                        if (Array.isArray(res.shafts) && res.shafts.length) {
+                            res.shafts.forEach(s => $editShaftList.append(editShaftRow(s.id, s
+                                .nama_shaft)));
+                        } else {
+                            $editShaftList.append(editShaftRow());
+                        }
+
+                        // setelah data siap, atur transisi modal
+                        if ($('#modalRakBarang').hasClass('show')) {
+                            $('#modalRakBarang')
+                                .one('hidden.bs.modal', function() {
+                                    $('#modalEditRak').modal({
+                                        show: true,
+                                        backdrop: 'static'
+                                    });
+                                })
+                                .modal('hide');
+                        } else {
+                            $('#modalEditRak').modal({
+                                show: true,
+                                backdrop: 'static'
+                            });
+                        }
+                    })
+                    .fail(() => swalError('Gagal memuat detail rak'));
+            });
+
+            $('#modalEditRak').on('hidden.bs.modal', function() {
+                $('#modalRakBarang').modal('show');
+            });
+
+            $('#btnEditAddShaft').on('click', function() {
+                $editShaftList.append(editShaftRow());
+            });
+
+            // hapus baris shaft di UI (boleh tinggal 1, kosongkan saja)
+            $editShaftList.on('click', '.btn-edit-hapus-shaft', function() {
+                const total = $editShaftList.find('.edit-shaft-row').length;
+                if (total > 1) $(this).closest('.edit-shaft-row').remove();
+                else $(this).closest('.edit-shaft-row').find('input[type="text"]').val('').focus();
+            });
+            $('#formEditRak').on('submit', function(e) {
+                e.preventDefault();
+                renumberShaftInputs(); // <<< penting
+
+                const id = $('#edit_rak_id').val();
+                const payload = $(this).serialize();
+
+                $.ajax({
+                        url: "{{ route('rak.update', ':id') }}".replace(':id', id),
+                        type: 'POST',
+                        data: payload
+                    })
+                    .done(function(resp) {
+                        $('#modalEditRak').modal('hide');
+                        swalSuccess(resp.message || 'Rak & shafts diperbarui');
+                        $('#btnListRakBarang').trigger('click');
+                    })
+                    .fail(function(xhr) {
+                        swalFromXhr(xhr, 'Gagal menyimpan perubahan rak');
+                    });
             });
 
 

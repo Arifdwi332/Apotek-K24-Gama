@@ -533,5 +533,87 @@ if ($r->filled('status')) {
         ->make(true);
 }
 
+public function rakShow(M_Rak $rak)
+{
+    $rak->load(['shafts' => function($q){
+        $q->orderBy('nama_shaft');
+    }]);
+
+    $shaftIds = $rak->shafts->pluck('id');
+    $barangCounts = \App\Models\M_MstBarang::whereIn('rak_shaft_id', $shaftIds)
+        ->select('rak_shaft_id', DB::raw('COUNT(*) as jml'))
+        ->groupBy('rak_shaft_id')->pluck('jml','rak_shaft_id');
+
+    return response()->json([
+        'id'       => $rak->id,
+        'nama_rak' => $rak->nama_rak,
+        'shafts'   => $rak->shafts->map(fn($s)=>[
+            'id'           => $s->id,
+            'nama_shaft'   => $s->nama_shaft,
+            'barang_count' => (int)($barangCounts[$s->id] ?? 0),
+        ])->values(),
+    ]);
+}
+
+public function rakUpdate(Request $r, \App\Models\M_Rak $rak)
+{
+    $r->validate([
+        'nama_rak'    => 'required|string|max:100',
+        'shafts'      => 'required|array|min:1',
+        'shafts.*.nama_shaft' => 'required|string|max:100',
+        'shafts.*.id'         => 'nullable|integer',
+    ]);
+
+    $blocked = []; 
+
+    DB::transaction(function() use ($r, $rak, &$blocked){
+        $rak->update(['nama_rak' => $r->nama_rak]);
+
+        $existing = $rak->shafts()->get(['id','nama_shaft'])->keyBy('id');
+
+        $inputIds = [];
+        foreach ($r->shafts as $row) {
+            $sid = $row['id'] ?? null;
+            $nm  = trim($row['nama_shaft']);
+            if ($sid && $existing->has($sid)) {
+                // update
+                $rak->shafts()->where('id', $sid)->update(['nama_shaft' => $nm]);
+                $inputIds[] = (int)$sid;
+            } else {
+                // create baru
+                $new = $rak->shafts()->create(['nama_shaft' => $nm]);
+                $inputIds[] = (int)$new->id;
+            }
+        }
+
+       $toDelete = $existing->keys()->diff($inputIds)->values();
+
+        if ($toDelete->isNotEmpty()) {
+            // shaft yang dipakai barang (tidak boleh dihapus)
+            $usedIds = \App\Models\M_MstBarang::whereIn('rak_shaft_id', $toDelete)
+                        ->pluck('rak_shaft_id')->unique();
+
+            $canDelete = $toDelete->diff($usedIds);
+
+            if ($canDelete->isNotEmpty()) {
+                $rak->shafts()->whereIn('id', $canDelete)->delete();
+            }
+
+            if ($usedIds->isNotEmpty()) {
+                $blocked = \App\Models\M_RakShaft::whereIn('id', $usedIds)
+                            ->pluck('nama_shaft')->values()->all();
+            }
+        }
+    });
+
+    $msg = 'Rak & shafts berhasil diperbarui.';
+    if (!empty($blocked)) {
+        $msg .= ' Catatan: Beberapa shaft berikut tidak dapat dihapus karena masih memiliki barang yang terdaftar: '
+              . implode(', ', $blocked) . '.';
+    }
+
+    return response()->json(['success'=>true, 'message'=>$msg, 'blocked'=>$blocked]);
+}
+
 
 }

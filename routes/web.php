@@ -89,6 +89,15 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('/rak/list-rak-barang', [BarangStokController::class, 'listRakBarang'])
          ->name('rak.list');
+         // RAK
+        Route::get('/rak/{rak}', [BarangStokController::class, 'rakShow'])->name('rak.show');
+        Route::put('/rak/{rak}', [BarangStokController::class, 'rakUpdate'])->name('rak.update');
+
+        // SHAFT (opsional, tetap boleh hapus shaft terpisah dari modal)
+        Route::get('/rak-shafts/{shaft}', [BarangStokController::class, 'shaftShow'])->name('shaft.show');
+        Route::put('/rak-shafts/{shaft}', [BarangStokController::class, 'shaftUpdate'])->name('shaft.update');
+        Route::delete('/rak-shafts/{shaft}', [BarangStokController::class, 'shaftDestroy'])->name('shaft.destroy');
+
         // REPORT STOCK
         Route::get('/stock-barang/report', [BarangStokController::class, 'reportPage'])
             ->name('barangstok.reportPage');
