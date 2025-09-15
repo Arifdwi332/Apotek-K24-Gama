@@ -16,27 +16,29 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-striped" id="tableHistory" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Tgl Catat</th>
-                        <th>Rak</th>
-                        <th>Shaft</th>
-                        <th>Nama Barang</th>
-                        <th>Expired</th>
-                        <th>Masuk</th>
-                        <th>Keluar</th>
-                        <th>Saldo</th>
-                        <th>Satuan</th>
-                        <th>Lokasi</th>
-                        <th>Keterangan</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Diubah Oleh</th>
-                        <th>Admin Tool</th>
-                    </tr>
-                </thead>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="tableHistory" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tgl Catat</th>
+                            <th>Rak</th>
+                            <th>Shaft</th>
+                            <th>Nama Barang</th>
+                            <th>Expired</th>
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                            <th>Saldo</th>
+                            <th>Satuan</th>
+                            <th>Lokasi</th>
+                            <th>Keterangan</th>
+                            <th>Dibuat Oleh</th>
+                            <th>Diubah Oleh</th>
+                            <th>Admin Tool</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
     <div class="modal fade" id="modalEditHistory" tabindex="-1" aria-hidden="true">
