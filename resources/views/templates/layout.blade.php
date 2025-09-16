@@ -213,12 +213,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a href="{{ route('barangstok.reportPage') }}" class="nav-link">
-                                <i class="nav-icon fas fa-file-invoice"></i>
-                                <p>Report</p>
-                            </a>
-                        </li>
+
                         <!-- <li class="nav-item">
                             <a href="{{ route('logstok.input_stock') }}" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice"></i>
