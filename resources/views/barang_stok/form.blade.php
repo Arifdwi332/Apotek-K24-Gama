@@ -44,10 +44,23 @@
                                 value="tablet" checked>
                             <label class="custom-control-label" for="sat_tablet">Tablet</label>
                         </div>
+
                         <div class="custom-control custom-radio custom-control-inline">
                             <input type="radio" id="sat_strip" name="satuan" class="custom-control-input"
                                 value="strip">
                             <label class="custom-control-label" for="sat_strip">Strip</label>
+                        </div>
+
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="sat_botol" name="satuan" class="custom-control-input"
+                                value="botol">
+                            <label class="custom-control-label" for="sat_botol">Botol</label>
+                        </div>
+
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="sat_pcs" name="satuan" class="custom-control-input"
+                                value="pcs">
+                            <label class="custom-control-label" for="sat_pcs">PCS</label>
                         </div>
                     </div>
 

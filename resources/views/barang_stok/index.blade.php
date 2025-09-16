@@ -24,6 +24,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Barang</th>
+                            <th>Satuan</th>
                             <th>Rak</th>
                             <th>Shaft</th>
                             @if (is_admin())
@@ -150,20 +151,35 @@
                         </div>
 
                         {{-- Satuan: RADIO --}}
+                        {{-- Satuan: RADIO (MODAL CATAT) --}}
                         <div class="form-group col-md-6">
                             <label class="d-block">Satuan</label>
 
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="sat_tablet" name="satuan" class="custom-control-input"
+                                <input type="radio" id="catat_sat_tablet" name="satuan" class="custom-control-input"
                                     value="tablet" checked>
-                                <label class="custom-control-label" for="sat_tablet">Tablet</label>
+                                <label class="custom-control-label" for="catat_sat_tablet">Tablet</label>
                             </div>
+
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="sat_strip" name="satuan" class="custom-control-input"
+                                <input type="radio" id="catat_sat_strip" name="satuan" class="custom-control-input"
                                     value="strip">
-                                <label class="custom-control-label" for="sat_strip">Strip</label>
+                                <label class="custom-control-label" for="catat_sat_strip">Strip</label>
+                            </div>
+
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="catat_sat_botol" name="satuan" class="custom-control-input"
+                                    value="botol">
+                                <label class="custom-control-label" for="catat_sat_botol">Botol</label>
+                            </div>
+
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="catat_sat_pcs" name="satuan" class="custom-control-input"
+                                    value="pcs">
+                                <label class="custom-control-label" for="catat_sat_pcs">PCS</label>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="form-group">
@@ -354,6 +370,10 @@
                 {
                     data: 'barang_nm',
                     name: 'barang_nm'
+                },
+                {
+                    data: 'satuan',
+                    name: 'satuan'
                 },
                 {
                     data: 'rak_nama',

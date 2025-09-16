@@ -104,7 +104,7 @@ class BarangStokController extends Controller
 
             'arah'          => 'required|in:masuk,keluar',   
             'stok'          => 'required|integer|min:0',     
-            'satuan'        => 'nullable|in:tablet,strip',  
+            'satuan'        => 'nullable|in:tablet,strip,botol,pcs',  
             'lokasi'        => 'nullable|string|max:150',
             'keterangan'    => 'nullable|string',
 
@@ -282,7 +282,7 @@ class BarangStokController extends Controller
             'exp_tgl'    => ['nullable','date'],
             'arah'       => ['required', Rule::in(['masuk','keluar'])],
             'jumlah'     => ['required','integer','min:0'],
-            'satuan'     => ['nullable', Rule::in(['tablet','strip'])],
+            'satuan'     => ['nullable', Rule::in(['tablet','strip','botol','pcs'])],
             'lokasi'     => ['nullable','string','max:150'],
             'keterangan' => ['nullable','string'],
         ]);
