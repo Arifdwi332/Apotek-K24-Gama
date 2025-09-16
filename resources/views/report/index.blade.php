@@ -82,6 +82,8 @@
                             <th>Rak</th>
                             <th>Shaft</th>
                             <th>Nama Barang</th>
+                            <th>Satuan</th>
+                            </th>
                             <th>Expired Date</th>
                             <th>Status</th>
                             <th>Masuk</th>
@@ -151,6 +153,10 @@
                     {
                         data: 'barang_nm',
                         name: 'barang_nm'
+                    },
+                    {
+                        data: 'satuan',
+                        name: 'satuan'
                     },
                     {
                         data: 'exp_tgl',

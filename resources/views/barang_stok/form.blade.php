@@ -36,7 +36,20 @@
                             <option value="">-- Pilih Shaft --</option>
                         </select>
                     </div>
+                    <div class="form-group col-md-6">
+                        <label class="d-block">Satuan</label>
 
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="sat_tablet" name="satuan" class="custom-control-input"
+                                value="tablet" checked>
+                            <label class="custom-control-label" for="sat_tablet">Tablet</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="sat_strip" name="satuan" class="custom-control-input"
+                                value="strip">
+                            <label class="custom-control-label" for="sat_strip">Strip</label>
+                        </div>
+                    </div>
 
                     <div class="form-group">
                         <label for="stok">Jumlah Stock</label>
